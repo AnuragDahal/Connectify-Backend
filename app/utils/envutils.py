@@ -13,3 +13,6 @@ class Environment():
             "ACCESS_TOKEN_EXPIRE_MINUTES"))
         self.TOKEN_TYPE = "bearer"
         self.TOKEN_KEY = "token"
+        self.CLIENT_ID = os.environ.get('CLIENT_ID')
+        self.CLIENT_SECRET = os.environ.get('CLIENT_SECRET')
+        self.OAUTHSECRET_KEY = os.environ.get('OAUTHSECRET_KEY')
