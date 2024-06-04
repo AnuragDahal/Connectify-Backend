@@ -6,13 +6,6 @@ from ..models import schemas
 router = APIRouter(prefix='/api/v1', tags=["Users"])
 
 
-@router.post("/user", status_code=status.HTTP_201_CREATED,)
-async def create_user(req: schemas.User):
-
-    user = UserManager.create(req)
-    return user
-
-
 @router.get("/user", response_model=List[schemas.User], status_code=status.HTTP_200_OK,)
 async def read_user():
 

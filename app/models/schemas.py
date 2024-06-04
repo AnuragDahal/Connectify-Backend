@@ -9,3 +9,5 @@ class User(BaseModel):
 
 class UpdateUserEmail(BaseModel):
     email: str
+
+

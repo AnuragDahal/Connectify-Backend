@@ -3,21 +3,14 @@ from fastapi import APIRouter, Depends, status, Response
 from ..handlers.authhandler import AuthHandler
 from ..handlers.userhandler import UserManager
 from ..models import schemas
-from typing import List
-router = APIRouter(tags=["Auth"])
+
+router = APIRouter(prefix='/api/v1', tags=["Auth"])
 
 
 @router.post("/signup", status_code=status.HTTP_201_CREATED,)
-async def create_user(req: schemas.User):
+async def Signup_User(req: schemas.User):
 
     user = UserManager.create(req)
-    return user
-
-
-@router.get("/user", response_model=List[schemas.User], status_code=status.HTTP_200_OK,)
-async def read_user():
-
-    user = UserManager.read()
     return user
 
 
