@@ -21,8 +21,6 @@ async def auth(request: Request):
     # print(f"Callback URL: {request.url}")
     state = request.session.get('state')
     stateInQuery = request.query_params.get('state')
-    print("state in QueryParams:", stateInQuery)
-    print("state in /auth:", state)
     if not state or state != request.query_params.get('state'):
         raise HTTPException(status_code=400, detail='Invalid state parameter.')
 
@@ -42,4 +40,3 @@ async def auth(request: Request):
     return RedirectResponse(url='/home')
 
 
-# p5UtyHQoV97xxg044ijgqw
