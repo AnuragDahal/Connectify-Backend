@@ -2,7 +2,7 @@ from authlib.jose import jwt, JsonWebKey
 from authlib.integrations.starlette_client import OAuth
 import secrets
 import requests
-from ..utils.envutils import Environment
+from ...utils.envutils import Environment
 
 env = Environment()
 oauth = OAuth()

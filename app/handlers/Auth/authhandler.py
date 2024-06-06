@@ -3,10 +3,10 @@ from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import JSONResponse
 from jose import jwt
 from datetime import timedelta
-from ..utils.envutils import Environment
-from ..handlers.exception import ErrorHandler
-from ..utils.jwtutil import create_access_token
-from ..handlers.userhandler import Validate
+from ...utils.envutils import Environment
+from ..exception import ErrorHandler
+from ...utils.jwtutil import create_access_token
+from ..User.userhandler import Validate
 
 env = Environment()
 SECRET_KEY = env.secret_key

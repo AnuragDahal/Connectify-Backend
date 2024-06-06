@@ -1,7 +1,7 @@
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi import APIRouter, Depends, status, Response
-from ..handlers.authhandler import AuthHandler
-from ..handlers.userhandler import UserManager
+from ..handlers.Auth.authhandler import AuthHandler
+from ..handlers.User.userhandler import UserManager
 from ..models import schemas
 
 router = APIRouter(prefix='/api/v1', tags=["Auth"])

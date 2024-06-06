@@ -1,11 +1,11 @@
-from ..models import schemas
+from ...models import schemas
 from fastapi import Request, Depends, Response
-from ..core.database import user_collection
-from ..handlers.exception import ErrorHandler
+from ...core.database import user_collection
+from ..exception import ErrorHandler
 from pymongo import ReturnDocument
-from ..config.dependencies import verify_token
+from ...config.dependencies import verify_token
 
-from ..utils.passhashutils import Encryptor
+from ...utils.passhashutils import Encryptor
 
 
 class Validate:

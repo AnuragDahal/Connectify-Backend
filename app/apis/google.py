@@ -1,7 +1,7 @@
 from fastapi import HTTPException, APIRouter, Request
 from starlette.responses import RedirectResponse
-from ..handlers.oauthHandler import google, generate_state, validate_token
-from ..handlers.userhandler import Validate
+from ..handlers.Auth.oauthHandler import google, generate_state, validate_token
+from ..handlers.User.userhandler import Validate
 from ..core.database import user_collection
 from ..models.schemas import OauthUser
 

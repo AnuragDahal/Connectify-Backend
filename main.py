@@ -5,6 +5,8 @@ from app.core.database import client, db
 from starlette.middleware.sessions import SessionMiddleware
 from app.utils.envutils import Environment
 
+
+
 env = Environment()
 
 app = FastAPI(title="CONNECTIFY", version="0.1.0")

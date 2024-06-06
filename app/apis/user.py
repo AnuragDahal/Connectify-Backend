@@ -1,5 +1,5 @@
 from fastapi import APIRouter, status, Request, Depends, Response
-from ..handlers.userhandler import UserManager
+from ..handlers.User.userhandler import UserManager
 from typing import List
 from ..config.dependencies import verify_token
 from ..models import schemas
