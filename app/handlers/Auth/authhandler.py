@@ -44,3 +44,4 @@ class AuthHandler:
             return {"message": "Logged out"}
         except Exception as e:
             return ErrorHandler.NotFound(e)
+

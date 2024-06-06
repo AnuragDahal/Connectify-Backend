@@ -27,13 +27,6 @@ class UserManager:
         duplicate_user = user_collection.find_one({"email": request.email})
         if not duplicate_user:
             hashed_password = Encryptor.hash_password(request.password)
-            # Send the email to the user on the provided email address
-            # otp = EmailHandler.generate_email_verification_otp()
-            # Store the otp in the database to verify the user
-            # otp_collection.insert_one({"email": request.email, "otp": otp})
-            # Send the email to the user along with the otp
-            # sent_email= EmailHandler.send_email_to(request.email, otp)
-            # Verify the otp and add the user to the db if the otp is correct
             new_user = user_collection.insert_one(
                 {**request.model_dump(exclude={"password"}), "password": hashed_password})
             return {"id": str(new_user.inserted_id)}

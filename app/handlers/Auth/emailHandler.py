@@ -2,8 +2,11 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from ...utils.envutils import Environment
+from ...models.models import User
 import random
-
+from ...core.database import otp_collection, user_collection
+from ...utils.passhashutils import Encryptor
+from ...handlers.exception import ErrorHandler
 env = Environment()
 
 
@@ -59,6 +62,7 @@ class EmailHandler:
             print(str(e))
             return False
 
+    @staticmethod
     def VerifyOtp(otp, user_otp):
         if otp == user_otp:
             return True
@@ -69,9 +73,28 @@ class EmailHandler:
         try:
             otp = EmailHandler.generate_email_verification_otp()
             isEmailSent = EmailHandler.send_email_to(recipient, otp)
+            # Add the otp to the database
+            otp_collection.insert_one({"email": recipient, "otp": otp})
             if isEmailSent:
                 return "Email sent Successfully"
             else:
                 return "Email not sent"
         except Exception as e:
             return str(e)
+
+    @staticmethod
+    def HandleOtpVerification(user_otp: str, user_email: str):
+        # Get the otp from the database of the specific user
+        email_doc = otp_collection.find_one({"email": user_email})
+        if email_doc is not None:
+            otp_in_db = email_doc["otp"]
+            # Verify the otp
+            isOtpVerified = EmailHandler.VerifyOtp(user_otp, otp_in_db)
+            if isOtpVerified:
+                # Update the user's email verification status
+                user_collection.update_one({"email": user_email}, {
+                                           "$set": {"isEmailVerified": True}})
+                return "Email Verified Successfully"
+            else:
+                return ErrorHandler.Error("Email Verification Failed, incorrect OTP")
+        return ErrorHandler.Error("OTP expired or Otp not found")

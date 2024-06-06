@@ -34,3 +34,10 @@ async def email_verification(email: str):
     handler = EmailHandler()
     isVerified = handler.HandleEmailVerification(email)
     return isVerified
+
+
+@router.post("/otp", status_code=status.HTTP_200_OK)
+async def otp_verification(otp: str, email: str):
+
+    isVerified = EmailHandler.HandleOtpVerification(otp, email)
+    return isVerified
