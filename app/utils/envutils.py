@@ -16,3 +16,5 @@ class Environment():
         self.CLIENT_ID = os.environ.get('CLIENT_ID')
         self.CLIENT_SECRET = os.environ.get('CLIENT_SECRET')
         self.OAUTHSECRET_KEY = os.environ.get('OAUTHSECRET_KEY')
+        self.gmail_user = os.environ.get('GMAIL_USER')
+        self.gmail_password = os.environ.get('GMAIL_PASSWORD')
