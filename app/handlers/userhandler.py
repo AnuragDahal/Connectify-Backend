@@ -5,7 +5,7 @@ from ..handlers.exception import ErrorHandler
 from pymongo import ReturnDocument
 from ..config.dependencies import verify_token
 
-# from utils.passhashutils import Encryptor
+from ..utils.passhashutils import Encryptor
 
 
 class Validate:
@@ -14,7 +14,7 @@ class Validate:
         check_email = user_collection.find_one({"email": email})
         if check_email:
             return email
-        raise ErrorHandler.NotFound("Email not found")
+        return False
 
 
 class UserManager:
@@ -27,7 +27,7 @@ class UserManager:
         duplicate_user = user_collection.find_one({"email": request.email})
         if not duplicate_user:
             # Import Encryptor only when it's needed
-            from utils.passhashutils import Encryptor
+
             hashed_password = Encryptor.hash_password(request.password)
             new_user = user_collection.insert_one(
                 {**request.model_dump(exclude={"password"}), "password": hashed_password})

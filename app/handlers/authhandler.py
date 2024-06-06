@@ -20,7 +20,6 @@ class AuthHandler:
     @staticmethod
     def login(request: OAuth2PasswordRequestForm = Depends()):
         user_email = Validate.verify_email(request.username)
-        print(user_email)
         if user_email:
             access_token_expires = timedelta(
                 minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
