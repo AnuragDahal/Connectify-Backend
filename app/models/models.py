@@ -1,6 +1,7 @@
 from pydantic import BaseModel, EmailStr, Field
 from typing import List, Optional
 from fastapi import UploadFile
+from datetime import datetime
 
 
 class User(BaseModel):
@@ -24,3 +25,10 @@ class OauthUser(BaseModel):
     commented: Optional[List[str]] = Field(None, min_items=0)
     comments_on_posts: Optional[List[str]] = Field(None, min_items=0)
     friends: Optional[List[str]] = Field(None, min_items=0, max_items=1000)
+
+
+class Otp(BaseModel):
+    email: EmailStr = Field(..., min_length=5, max_length=100)
+    otp: str = Field(..., min_length=6, max_length=6)
+    expires_on: str = Field(
+        None, default=datetime.now().strftime("%Y-%m-%d %H:%M:%S"))

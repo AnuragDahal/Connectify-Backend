@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, EmailStr
 from typing import List, Optional
 
 
@@ -27,3 +27,9 @@ class OauthUser(BaseModel):
 
 class UpdateUserEmail(BaseModel):
     email: str
+
+
+class StoreOtp(BaseModel):
+    email: EmailStr
+    otp: str
+    expires_on: str
