@@ -2,15 +2,16 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from ...utils.envutils import Environment
-from ...models.models import User
 import random
 from ...core.database import otp_collection, user_collection
-from ...utils.passhashutils import Encryptor
 from ...handlers.exception import ErrorHandler
+from datetime import datetime, timezone
 env = Environment()
 
 
 class EmailHandler:
+    '''
+    This class is responsible for handling the email verification process.'''
     @staticmethod
     def generate_email_verification_otp():
         # Generate a random 6-digit number
@@ -74,7 +75,8 @@ class EmailHandler:
             otp = EmailHandler.generate_email_verification_otp()
             isEmailSent = EmailHandler.send_email_to(recipient, otp)
             # Add the otp to the database
-            otp_collection.insert_one({"email": recipient, "otp": otp})
+            otp_collection.insert_one(
+                {"email": recipient, "otp": otp, "expires_on": datetime.now(timezone.utc)})
             if isEmailSent:
                 return "Email sent Successfully"
             else:
@@ -91,11 +93,15 @@ class EmailHandler:
             # Verify the otp
             isOtpVerified = EmailHandler.VerifyOtp(user_otp, otp_in_db)
             if isOtpVerified:
+                # Check if the user exists in the user_collection
+                isUser = user_collection.find_one({"email": user_email})
+                if not isUser:
+                    return ErrorHandler.NotFound("User not found in the database")
                 # Update the user's email verification status
                 user_collection.update_one({"email": user_email},
                                            {"$set": {"isEmailVerified": True}})
                 # After updating the user's email verification status, delete the otp from the database
-                user_collection.delete_one({"email:": user_email})
+                otp_collection.delete_one({"email:": user_email})
                 return "Email Verified Successfully"
             else:
                 return ErrorHandler.Unauthorized("Email Verification Failed, incorrect OTP")

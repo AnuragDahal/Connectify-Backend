@@ -82,3 +82,9 @@ class UserManager:
         if deleted_user.deleted_count == 0:
             raise ErrorHandler.NotFound("User not found")
         return {"message": "User deleted successfully"}
+
+
+class UploadManager:
+    @staticmethod
+    def HandleUploadProfilePic(img):
+        pass

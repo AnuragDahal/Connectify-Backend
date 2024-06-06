@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr
 from typing import List, Optional
-
+from datetime import datetime, timezone
 
 class UserSignUp(BaseModel):
     name: str
@@ -34,7 +34,3 @@ class UserDetails(BaseModel):
 class UpdateUserEmail(BaseModel):
     email: str
 
-
-class StoreOtp(BaseModel):
-    email: EmailStr
-    otp: str
