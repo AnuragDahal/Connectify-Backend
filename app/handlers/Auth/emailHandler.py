@@ -24,7 +24,7 @@ class EmailHandler:
 
         We recently received a request for a new login or signup associated with this email address. If you initiated this request, please enter the following verification code to confirm your identity:
 
-        Verification Code: f{otp}
+        Verification Code: {otp}
         If you did not initiate this request, please disregard this email and no changes will be made to your account.
 
         Thank you,
@@ -43,10 +43,13 @@ class EmailHandler:
         server.login(gmail_user, gmail_password)
 
         # Send the email
-        server.send_message(msg)
-
-        # Close the connection to the server
-        server.quit()
+        try:
+            server.send_message(msg)
+            server.quit()
+            return True
+        except Exception as e:
+            print(str(e))
+            return False
 
     def VerifyOtp(otp, user_otp):
         if otp == user_otp:
@@ -58,8 +61,9 @@ class EmailHandler:
         try:
             otp = EmailHandler.generate_email_verification_otp()
             isEmailSent = EmailHandler.send_email_to(recipient, otp)
-            print(isEmailSent)
             if isEmailSent:
                 return "Email sent Successfully"
+            else:
+                return "Email not sent"
         except Exception as e:
             return str(e)
