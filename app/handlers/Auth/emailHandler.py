@@ -92,9 +92,9 @@ class EmailHandler:
             isOtpVerified = EmailHandler.VerifyOtp(user_otp, otp_in_db)
             if isOtpVerified:
                 # Update the user's email verification status
-                user_collection.update_one({"email": user_email}, {
-                                           "$set": {"isEmailVerified": True}})
+                user_collection.update_one({"email": user_email},
+                                           {"$set": {"isEmailVerified": True}})
                 return "Email Verified Successfully"
             else:
-                return ErrorHandler.Error("Email Verification Failed, incorrect OTP")
-        return ErrorHandler.Error("OTP expired or Otp not found")
+                return ErrorHandler.Unauthorized("Email Verification Failed, incorrect OTP")
+        return ErrorHandler.Error("Invalid Email or OTP not found in the database")

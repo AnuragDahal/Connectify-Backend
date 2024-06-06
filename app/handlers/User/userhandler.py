@@ -19,7 +19,7 @@ class Validate:
 
 class UserManager:
     @staticmethod
-    def create(request: schemas.User):
+    def create(request: schemas.UserSignUp):
         """
         Insert a new user record.
         A unique `id` will be created and provided in the response.

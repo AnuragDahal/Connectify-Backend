@@ -6,14 +6,14 @@ from ..models import schemas
 router = APIRouter(prefix='/api/v1', tags=["Users"])
 
 
-@router.get("/user", response_model=List[schemas.User], status_code=status.HTTP_200_OK,)
+@router.get("/user", response_model=List[schemas.UserSignUp], status_code=status.HTTP_200_OK,)
 async def read_user():
 
     user = UserManager.read()
     return user
 
 
-@router.patch("/update/{old_email}", response_model=schemas.User, status_code=status.HTTP_200_OK, dependencies=[Depends(verify_token)])
+@router.patch("/update/{old_email}", response_model=schemas.UserSignUp, status_code=status.HTTP_200_OK, dependencies=[Depends(verify_token)])
 async def update_user(old_email: str, request: Request, new_email: schemas.UpdateUserEmail):
 
     update_data = await UserManager.update(old_email, request, new_email)

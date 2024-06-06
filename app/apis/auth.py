@@ -9,7 +9,7 @@ router = APIRouter(prefix='/api/v1', tags=["Auth"])
 
 
 @router.post("/signup", status_code=status.HTTP_201_CREATED,)
-async def Signup_User(req: schemas.User):
+async def Signup_User(req: schemas.UserSignUp):
 
     user = UserManager.create(req)
     return user
