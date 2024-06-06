@@ -32,4 +32,3 @@ class UpdateUserEmail(BaseModel):
 class StoreOtp(BaseModel):
     email: EmailStr
     otp: str
-    expires_on: str

@@ -7,6 +7,7 @@ env = Environment()
 
 
 class EmailHandler:
+    @staticmethod
     def generate_email_verification_otp():
         # Generate a random 6-digit number
         return str(random.randint(100000, 999999))
@@ -14,8 +15,8 @@ class EmailHandler:
     @staticmethod
     def send_email_to(recipient: str, otp: int):
         # Define your Gmail username and password
-        gmail_user = env.gmail_user
-        gmail_password = env.gmail_password
+        gmail_user = env.GMAIL_USER
+        gmail_password = env.APP_SPECIFIC_PASS
 
         # Create a MIMEText object with the email message
         message = f"""
@@ -51,3 +52,14 @@ class EmailHandler:
         if otp == user_otp:
             return True
         return False
+
+    @staticmethod
+    def HandleEmailVerification(recipient: str):
+        try:
+            otp = EmailHandler.generate_email_verification_otp()
+            isEmailSent = EmailHandler.send_email_to(recipient, otp)
+            print(isEmailSent)
+            if isEmailSent:
+                return "Email sent Successfully"
+        except Exception as e:
+            return str(e)

@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, status, Response
 from ..handlers.Auth.authhandler import AuthHandler
 from ..handlers.User.userhandler import UserManager
 from ..models import schemas
+from ..handlers.Auth.emailHandler import EmailHandler
 
 router = APIRouter(prefix='/api/v1', tags=["Auth"])
 
@@ -26,3 +27,10 @@ async def logout(res: Response):
 
     user_out = AuthHandler.logout(res)
     return user_out
+
+
+@router.post("/verify", status_code=status.HTTP_200_OK)
+async def email_verification(email: str):
+    handler = EmailHandler()
+    isVerified = handler.HandleEmailVerification(email)
+    return isVerified
