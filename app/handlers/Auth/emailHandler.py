@@ -78,7 +78,7 @@ class EmailHandler:
             if isEmailSent:
                 return "Email sent Successfully"
             else:
-                return "Email not sent"
+                return ErrorHandler.Error("Invalid Email Address or Email not sent successfully")
         except Exception as e:
             return str(e)
 
@@ -94,6 +94,8 @@ class EmailHandler:
                 # Update the user's email verification status
                 user_collection.update_one({"email": user_email},
                                            {"$set": {"isEmailVerified": True}})
+                # After updating the user's email verification status, delete the otp from the database
+                user_collection.delete_one({"email:": user_email})
                 return "Email Verified Successfully"
             else:
                 return ErrorHandler.Unauthorized("Email Verification Failed, incorrect OTP")

@@ -41,3 +41,5 @@ async def otp_verification(otp: str, email: str):
 
     isVerified = EmailHandler.HandleOtpVerification(otp, email)
     return isVerified
+
+
