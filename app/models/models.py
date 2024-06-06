@@ -35,5 +35,5 @@ class OauthUser(BaseModel):
 class Otp(BaseModel):
     email: EmailStr = Field(..., min_length=5, max_length=100)
     otp: str = Field(..., min_length=6, max_length=6)
-    expires_on: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc))
+    # expires_on: datetime = Field(
+    #     default_factory=lambda: datetime.now(timezone.utc))

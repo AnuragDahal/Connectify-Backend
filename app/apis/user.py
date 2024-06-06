@@ -6,7 +6,7 @@ from ..models import schemas
 router = APIRouter(prefix='/api/v1', tags=["Users"])
 
 
-@router.get("/user", response_model=List[schemas.UserSignUp], status_code=status.HTTP_200_OK,)
+@router.get("/user", response_model=List[schemas.UserDetails], status_code=status.HTTP_200_OK,)
 async def read_user():
 
     user = UserManager.read()
