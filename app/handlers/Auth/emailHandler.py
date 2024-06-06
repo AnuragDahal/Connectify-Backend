@@ -1,4 +1,5 @@
 import smtplib
+from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from ...utils.envutils import Environment
 import random
@@ -18,19 +19,26 @@ class EmailHandler:
         gmail_user = env.GMAIL_USER
         gmail_password = env.APP_SPECIFIC_PASS
 
-        # Create a MIMEText object with the email message
-        message = f"""
-        Dear User,
+        # Create a MIMEMultipart object
+        msg = MIMEMultipart('alternative')
+        html = f"""
+    <html>
+    <body>
+        <p>Dear User,</p>
 
-        We recently received a request for a new login or signup associated with this email address. If you initiated this request, please enter the following verification code to confirm your identity:
+        <p>We recently received a request for a new login or signup associated with this email address. If you initiated this request, please enter the following verification code to confirm your identity:</p>
 
-        Verification Code: {otp}
-        If you did not initiate this request, please disregard this email and no changes will be made to your account.
+        <p><b>Verification Code: {otp}</b></p>
 
-        Thank you,
-        The Connectify Team
-        """
-        msg = MIMEText(message)
+        <p>If you did not initiate this request, please disregard this email and no changes will be made to your account.</p>
+
+        <p>Thank you,<br>
+        The Connectify Team</p>
+    </body>
+    </html>
+    """
+        # Add the HTML content to the MIMEMultipart object
+        msg.attach(MIMEText(html, 'html'))
         msg['Subject'] = 'Connectify Account Verification'
         msg['From'] = gmail_user
         msg['To'] = recipient
@@ -56,7 +64,7 @@ class EmailHandler:
             return True
         return False
 
-    @staticmethod
+    @ staticmethod
     def HandleEmailVerification(recipient: str):
         try:
             otp = EmailHandler.generate_email_verification_otp()
