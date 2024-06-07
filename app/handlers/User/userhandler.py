@@ -8,7 +8,6 @@ from ...config.dependencies import verify_token
 from ...utils.passhashutils import Encryptor
 
 
-
 class Validate:
     @staticmethod
     def verify_email(email: str):
@@ -83,4 +82,3 @@ class UserManager:
         if deleted_user.deleted_count == 0:
             raise ErrorHandler.NotFound("User not found")
         return {"message": "User deleted successfully"}
-
