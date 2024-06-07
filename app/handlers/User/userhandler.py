@@ -24,7 +24,8 @@ class UserManager:
         Insert a new user record.
         A unique `id` will be created and provided in the response.
         """
-        duplicate_user = user_collection.find_one({"email": request.email})
+        # duplicate_user = user_collection.find_one({"email": request.email})
+        duplicate_user = Validate.verify_email(request.email)
         if not duplicate_user:
             hashed_password = Encryptor.hash_password(request.password)
             new_user = user_collection.insert_one(

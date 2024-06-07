@@ -2,6 +2,7 @@ from pydantic import BaseModel, EmailStr
 from typing import List, Optional
 from datetime import datetime, timezone
 
+
 class UserSignUp(BaseModel):
     name: str
     email: str
@@ -34,3 +35,10 @@ class UserDetails(BaseModel):
 class UpdateUserEmail(BaseModel):
     email: str
 
+
+class Post(BaseModel):
+    title: str
+    content: str
+    posted_by: str
+    posted_on: datetime = datetime.now(timezone.utc)
+    image: Optional[str] = None

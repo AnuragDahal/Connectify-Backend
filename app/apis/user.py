@@ -33,3 +33,10 @@ async def upload_profile_pic(email: str, img: UploadFile = File(...)):
 
     img_upload = UploadManager.HandleUploadProfilePic(email, img)
     return img_upload
+
+
+@router.post("/posts", status_code=status.HTTP_200_OK)
+async def create_post(request: schemas.Post):
+
+    new_post = await UserManager.create_post(request)
+    return new_post
