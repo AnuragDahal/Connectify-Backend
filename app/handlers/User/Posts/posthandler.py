@@ -1,5 +1,5 @@
 
-from ....core.database import post_collection
+from ....core.database import post_collection, user_collection
 from ....models import schemas
 from ...exception import ErrorHandler
 
@@ -13,7 +13,11 @@ class PostsHandler:
         """
         new_post = post_collection.insert_one(
             {**request.model_dump(exclude=None)})
-
+        # Add the post details to the user db where the post is defined as well
+        user_collection.find_one_and_update(
+            {"email": request.posted_by},
+            {"$push": {"posts": {**request.model_dump(exclude=None)}}}
+        )
         return {"id": str(new_post.inserted_id)}
 
     @staticmethod
