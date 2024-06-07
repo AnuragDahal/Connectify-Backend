@@ -1,5 +1,6 @@
 from fastapi import APIRouter, status, Request, Depends, Response, UploadFile, File
-from ..handlers.User.userhandler import UserManager, UploadManager
+from ..handlers.User.userhandler import UserManager
+from ..handlers.User.uploadhandler import UploadManager
 from typing import List
 from ..config.dependencies import verify_token
 from ..models import schemas
