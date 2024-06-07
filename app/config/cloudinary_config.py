@@ -17,21 +17,20 @@ config = cloudinary.config(secure=True)
 #       config.cloud_name, config.api_key, "\n")
 
 
-def uploadImage(img_id, img_path):
+def uploadImage(img_id, img_file):
 
     # Upload the image and get its URL
     # ==============================
 
     # Upload the image.
     # Set the asset's public ID and allow overwriting the asset with new versions
-    cloudinary.uploader.upload(img_path,
+    cloudinary.uploader.upload(img_file,
                                public_id=img_id, unique_filename=False, overwrite=True)
 
     # Build the URL for the image and save it in the variable 'srcURL'
     srcURL = CloudinaryImage(img_id).build_url()
 
-    # Copy this URL in a browser tab to generate the image on the fly.
-    print("****2. Upload the image and get its URL****\nImage URL: ", srcURL, "\n")
+    return srcURL
 
 
 def getAssetInfo(public_id):
@@ -69,7 +68,3 @@ def createTransformation(public_id):
 
     # Log the URL to the console
     print("****4. Transform the image****\nTransfrmation URL: ", transformedURL, "\n")
-
-
-
-

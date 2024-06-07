@@ -1,11 +1,12 @@
 from ...models import schemas
-from fastapi import Request, Depends, Response
-from ...core.database import user_collection, otp_collection
+from fastapi import Request, Response
+from ...core.database import user_collection
 from ..exception import ErrorHandler
 from pymongo import ReturnDocument
 from ...config.dependencies import verify_token
-from ..Auth.emailHandler import EmailHandler
+
 from ...utils.passhashutils import Encryptor
+from ...config.cloudinary_config import uploadImage
 
 
 class Validate:
@@ -86,5 +87,18 @@ class UserManager:
 
 class UploadManager:
     @staticmethod
-    def HandleUploadProfilePic(img):
-        pass
+    def HandleUploadProfilePic(user_email, img):
+        """
+        Upload the user profile picture.
+        """
+        filename = img.filename.split(".")[0][:10]
+        img_bytes = img.file.read()
+        # Upload the image and get its URL
+        img_url = uploadImage(filename, img_bytes)
+        # Save the image URL in the database
+        user = user_collection.find_one_and_update(
+            {"email": user_email},
+            {"$set": {"profile_pic": img_url}},
+            return_document=ReturnDocument.AFTER
+        )
+        print(user)

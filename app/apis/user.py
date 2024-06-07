@@ -1,5 +1,5 @@
 from fastapi import APIRouter, status, Request, Depends, Response, UploadFile, File
-from ..handlers.User.userhandler import UserManager
+from ..handlers.User.userhandler import UserManager, UploadManager
 from typing import List
 from ..config.dependencies import verify_token
 from ..models import schemas
@@ -27,8 +27,8 @@ async def delete_user(request: Request, res: Response, depends=Depends(verify_to
     return user
 
 
-@router.post("/profile", status_code=status.HTTP_201_CREATED, dependencies=[Depends(verify_token)])
+@router.post("/profile", status_code=status.HTTP_200_OK)
 async def upload_profile_pic(img: UploadFile = File(...)):
 
-    img_upload = UserManager.HandleUploadProfilePic(img)
+    img_upload = UploadManager.HandleUploadProfilePic(img)
     return img_upload
