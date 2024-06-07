@@ -29,7 +29,7 @@ async def delete_user(request: Request, res: Response, depends=Depends(verify_to
 
 
 @router.post("/profile", status_code=status.HTTP_200_OK)
-async def upload_profile_pic(img: UploadFile = File(...)):
+async def upload_profile_pic(email: str, img: UploadFile = File(...)):
 
-    img_upload = UploadManager.HandleUploadProfilePic(img)
+    img_upload = UploadManager.HandleUploadProfilePic(email, img)
     return img_upload

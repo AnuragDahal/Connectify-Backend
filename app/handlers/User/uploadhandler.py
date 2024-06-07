@@ -23,10 +23,10 @@ class UploadManager:
             # Save the image URL in the database
             user = user_collection.find_one_and_update(
                 {"email": user_email},
-                {"$set": {"profile_pic": img_url}},
+                {"$set": {"profile_picture": img_url}},
                 # this will return the updated document
                 return_document=ReturnDocument.AFTER
             )
-            return user
+            return {"profile_pic": user["profile_picture"]}
         except Exception as e:
             return ErrorHandler.Error(e)
