@@ -1,14 +1,16 @@
-from fastapi import Request
-from ....core.database import user_collection
+
+from ....core.database import post_collection
+from ....models import schemas
 
 
 class PostsHandler:
 
     @staticmethod
-    def HandlePostCreation(request: Request):
+    def HandlePostCreation(request: schemas.Post):
         """
         Create a new post.
         """
-        new_post = user_collection.insert_one(
+        new_post = post_collection.insert_one(
             {**request.model_dump(exclude=None)})
+        
         return {"id": str(new_post.inserted_id)}

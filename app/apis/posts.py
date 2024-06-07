@@ -10,3 +10,4 @@ async def create_post(request: schemas.Post):
 
     new_post = PostsHandler.HandlePostCreation(request)
     return new_post
+

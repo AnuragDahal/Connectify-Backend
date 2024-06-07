@@ -1,6 +1,7 @@
 from pydantic import BaseModel, EmailStr
 from typing import List, Optional
 from datetime import datetime, timezone
+from fastapi import UploadFile, File
 
 
 class UserSignUp(BaseModel):
@@ -41,4 +42,4 @@ class Post(BaseModel):
     content: str
     posted_by: str
     posted_on: datetime = datetime.now(timezone.utc)
-    image: Optional[str] = None
+    image: str = None
