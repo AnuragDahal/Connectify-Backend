@@ -1,10 +1,9 @@
 from fastapi import FastAPI
-from app.apis import user, auth, google
+from app.apis import user, auth, google, posts
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.database import client, db
 from starlette.middleware.sessions import SessionMiddleware
 from app.utils.envutils import Environment
-
 
 
 env = Environment()
@@ -36,3 +35,4 @@ def home():
 app.include_router(user.router)
 app.include_router(auth.router)
 app.include_router(google.router)
+app.include_router(posts.router)

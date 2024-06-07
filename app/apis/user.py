@@ -1,6 +1,7 @@
 from fastapi import APIRouter, status, Request, Depends, Response, UploadFile, File
 from ..handlers.User.userhandler import UserManager
 from ..handlers.User.uploadhandler import UploadManager
+from ..handlers.User.Posts.posthandler import PostsHandler
 from typing import List
 from ..config.dependencies import verify_token
 from ..models import schemas
@@ -38,5 +39,5 @@ async def upload_profile_pic(email: str, img: UploadFile = File(...)):
 @router.post("/posts", status_code=status.HTTP_200_OK)
 async def create_post(request: schemas.Post):
 
-    new_post = await UserManager.create_post(request)
+    new_post = PostsHandler.HandlePostCreation(request)
     return new_post
