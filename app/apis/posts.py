@@ -25,3 +25,10 @@ async def delete_post(post_id: str):
 
     post = PostsHandler.HandlePostDeletion(post_id)
     return post
+
+
+@router.get("/{email}", response_model=List[schemas.Post], status_code=status.HTTP_200_OK)
+async def get_user_posts(email: str):
+
+    posts = PostsHandler.HandleUserPostsRetrieval(email)
+    return posts
