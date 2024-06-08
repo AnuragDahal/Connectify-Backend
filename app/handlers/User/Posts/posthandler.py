@@ -115,4 +115,15 @@ class PostsHandler:
             return {"message": "Post liked"}
         return ErrorHandler.NotFound("Post not found")
 
-  
+    @staticmethod
+    def HandleLikesCounts(post_id: str):
+        """
+        Get the number of likes for a post.
+        """
+        post = post_collection.find_one({"post_id": post_id})
+        if post:
+            count_likes = 0
+            for like in post["likes"]:
+                count_likes += 1
+            return {"likes": count_likes}
+        return ErrorHandler.NotFound("Post not found")

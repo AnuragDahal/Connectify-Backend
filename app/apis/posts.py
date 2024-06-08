@@ -53,3 +53,10 @@ async def like_post(post_id: str, liked_by_user: str):
 
     like = PostsHandler.HandlePostLike(post_id, liked_by_user)
     return like
+
+
+@router.get("/like/count", status_code=status.HTTP_200_OK)
+async def get_likes_count(post_id: str):
+
+    likes_count = PostsHandler.HandleLikesCounts(post_id)
+    return likes_count
