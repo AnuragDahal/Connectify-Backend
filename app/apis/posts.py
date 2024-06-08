@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status
+from fastapi import APIRouter, status, UploadFile, File
 from ..handlers.User.Posts.posthandler import PostsHandler
 from ..models import schemas
 from typing import List
@@ -20,7 +20,7 @@ async def get_posts():
     return posts
 
 
-@router.delete("/delete/{post_id}", status_code=status.HTTP_200_OK)
+@router.delete("/delete", status_code=status.HTTP_200_OK)
 async def delete_post(post_id: str):
 
     post = PostsHandler.HandlePostDeletion(post_id)
@@ -32,3 +32,10 @@ async def get_user_posts(email: str):
 
     posts = PostsHandler.HandleUserPostsRetrieval(email)
     return posts
+
+
+@router.post("/image", status_code=status.HTTP_200_OK)
+async def upload_post_image(post_id: str, file: UploadFile = File(...)):
+
+    upload_file = PostsHandler.HandlePostImageUpload(post_id, file)
+    return upload_file

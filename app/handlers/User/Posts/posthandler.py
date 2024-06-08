@@ -1,4 +1,4 @@
-
+from app.config.cloudinary_config import uploadImage
 from ....core.database import post_collection, user_collection
 from ....models import schemas
 from ...exception import ErrorHandler
@@ -56,3 +56,24 @@ class PostsHandler:
             return posts
         else:
             raise ErrorHandler.NotFound("User not found")
+
+    @staticmethod
+    def HandlePostImageUpload(post_id, file):
+        """
+        Upload an image for a post.
+        """
+        if not file:
+            raise ErrorHandler.Error("No image found")
+        post = post_collection.find_one({"post_id": post_id})
+        if post:
+            img_id = file.filename.split(".")[0][:10]
+            img_byte = file.file.read()
+            # Upload the image to the server
+            img_url = uploadImage(img_id, img_byte)
+            # insert the image url to the post_collection image field
+            post_collection.find_one_and_update(
+                {"post_id": post_id},
+                {"$set": {"image": img_url}}
+            )
+            return {"message": "Image uploaded successfully"}
+        raise ErrorHandler.NotFound("Post not found")
