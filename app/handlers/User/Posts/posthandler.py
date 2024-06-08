@@ -84,10 +84,11 @@ class PostsHandler:
         """
         Update a post.
         """
+        old_post = post_collection.find_one({"post_id": post_id})
         post = post_collection.find_one_and_update(
             {"post_id": post_id},
             {"$set": {
-                **request.model_dump(exclude=["post_id"]), "post_id": post_id}},
+                **request.model_dump(exclude={"post_id"}), "post_id": post_id}},
             return_document=ReturnDocument.AFTER
         )
         if post:

@@ -25,11 +25,11 @@ class OauthUser(BaseModel):
 
 class Post(BaseModel):
     post_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    title: str
-    content: str
-    posted_by: str
+    title: Optional[str] = None
+    content: Optional[str] = None
+    posted_by: Optional[str] = None
     posted_on: datetime = datetime.now(timezone.utc)
-    image: str = None
+    image: Optional[str] = None
 
 
 class UserDetails(BaseModel):
@@ -42,6 +42,7 @@ class UserDetails(BaseModel):
     posts: Optional[List[str]] = []
     commented: Optional[List[str]] = []
     comments_on_posts: Optional[List[str]] = []
+
 
 class UpdateUserEmail(BaseModel):
     email: str
