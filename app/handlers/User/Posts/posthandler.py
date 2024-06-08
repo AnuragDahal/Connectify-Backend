@@ -2,6 +2,7 @@ from app.config.cloudinary_config import uploadImage
 from ....core.database import post_collection, user_collection
 from ....models import schemas
 from ...exception import ErrorHandler
+from pymongo import ReturnDocument
 
 
 class PostsHandler:
@@ -76,4 +77,19 @@ class PostsHandler:
                 {"$set": {"image": img_url}}
             )
             return {"message": "Image uploaded successfully"}
+        raise ErrorHandler.NotFound("Post not found")
+
+    @staticmethod
+    def HandlePostUpdate(request: schemas.Post, post_id: str):
+        """
+        Update a post.
+        """
+        post = post_collection.find_one_and_update(
+            {"post_id": post_id},
+            {"$set": {
+                **request.model_dump(exclude=["post_id"]), "post_id": post_id}},
+            return_document=ReturnDocument.AFTER
+        )
+        if post:
+            return post
         raise ErrorHandler.NotFound("Post not found")

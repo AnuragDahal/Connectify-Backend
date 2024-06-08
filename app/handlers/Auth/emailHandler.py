@@ -8,6 +8,9 @@ from ...handlers.exception import ErrorHandler
 from datetime import datetime, timezone
 env = Environment()
 
+'''
+The @staticmethod decorator is used to declare a method as a static method, which means it belongs to the class and not the instance of the class. It can be called on the class itself, rather than on an instance of the class.'''
+
 
 class EmailHandler:
     '''
@@ -69,7 +72,7 @@ class EmailHandler:
             return True
         return False
 
-    @ staticmethod
+    @staticmethod
     def HandleEmailVerification(recipient: str):
         try:
             otp = EmailHandler.generate_email_verification_otp()

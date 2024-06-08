@@ -24,7 +24,7 @@ class OauthUser(BaseModel):
 
 
 class Post(BaseModel):
-    post_id:str = Field(default_factory=lambda: str(uuid.uuid4()))
+    post_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     title: str
     content: str
     posted_by: str
@@ -42,7 +42,6 @@ class UserDetails(BaseModel):
     posts: Optional[List[str]] = []
     commented: Optional[List[str]] = []
     comments_on_posts: Optional[List[str]] = []
-
 
 class UpdateUserEmail(BaseModel):
     email: str

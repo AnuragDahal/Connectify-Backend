@@ -39,3 +39,10 @@ async def upload_post_image(post_id: str, file: UploadFile = File(...)):
 
     upload_file = PostsHandler.HandlePostImageUpload(post_id, file)
     return upload_file
+
+
+@router.patch("/update", response_model=schemas.Post, status_code=status.HTTP_200_OK)
+async def update_post(request: schemas.Post, post_id: str):
+
+    updated_post = PostsHandler.HandlePostUpdate(request, post_id)
+    return updated_post
