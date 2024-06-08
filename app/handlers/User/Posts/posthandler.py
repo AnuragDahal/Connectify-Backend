@@ -3,6 +3,11 @@ from ....core.database import post_collection, user_collection
 from ....models import schemas
 from ...exception import ErrorHandler
 from pymongo import ReturnDocument
+import uuid
+
+
+def gen_random_post_id():
+    return str(uuid.uuid4())
 
 
 class PostsHandler:
@@ -13,7 +18,7 @@ class PostsHandler:
         Create a new post.
         """
         new_post = post_collection.insert_one(
-            {**request.model_dump(exclude=None)})
+            {**request.model_dump(exclude={"post_id"}), "post_id": gen_random_post_id()})
         # Add the post details to the user db where the post is defined as well
         # user_collection.find_one_and_update(
         #     {"email": request.posted_by},
@@ -84,7 +89,6 @@ class PostsHandler:
         """
         Update a post.
         """
-        old_post = post_collection.find_one({"post_id": post_id})
         post = post_collection.find_one_and_update(
             {"post_id": post_id},
             {"$set": {
@@ -94,3 +98,21 @@ class PostsHandler:
         if post:
             return post
         raise ErrorHandler.NotFound("Post not found")
+
+    @staticmethod
+    def HandlePostLike(post_id, email):
+        """
+        Like a post.
+        """
+        post = post_collection.find_one({"post_id": post_id})
+        if post:
+            if email in post["likes"]:
+                raise ErrorHandler.Error("Post already liked")
+            post_collection.find_one_and_update(
+                {"post_id": post_id},
+                {"$addToSet": {"likes": email}}
+            )
+            return {"message": "Post liked"}
+        return ErrorHandler.NotFound("Post not found")
+
+  

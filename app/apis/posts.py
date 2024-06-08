@@ -46,3 +46,10 @@ async def update_post(request: schemas.Post, post_id: str):
 
     updated_post = PostsHandler.HandlePostUpdate(request, post_id)
     return updated_post
+
+
+@router.patch("/like", status_code=status.HTTP_200_OK)
+async def like_post(post_id: str, liked_by_user: str):
+
+    like = PostsHandler.HandlePostLike(post_id, liked_by_user)
+    return like
