@@ -1,7 +1,6 @@
-from pydantic import BaseModel, EmailStr
-from typing import List, Optional
+from pydantic import BaseModel
+from typing import List, Optional, Dict, Any
 from datetime import datetime, timezone
-from fastapi import UploadFile, File
 
 
 class UserSignUp(BaseModel):
@@ -36,7 +35,8 @@ class UserDetails(BaseModel):
     isEmailVerified: Optional[bool]
     friends: Optional[List[str]] = []
     profile_picture: Optional[str] = str()
-    posts: Optional[List[Post]] = []
+    # posts: Optional[List[Dict[str, Any]]] = []
+    postsL: Optional[List[str]] = []
     commented: Optional[List[str]] = []
     comments_on_posts: Optional[List[str]] = []
 
