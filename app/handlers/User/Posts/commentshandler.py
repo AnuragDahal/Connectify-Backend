@@ -52,3 +52,21 @@ class CommentsHandler:
                 return updated_comment
             return ErrorHandler.NotFound("Failed to update comment")
         return ErrorHandler.NotFound("Post not found")
+
+    @staticmethod
+    def HandleCommentDeletion(comment_id: str):
+        """
+        Delete a comment.
+        """
+        is_comment = comments_collection.find_one(
+            {"_id": ObjectId(comment_id)})
+        if is_comment:
+            # Remove the comment_id from the post_id in the posts collection
+            post_collection.find_one_and_delete(
+                {"comments": comment_id}
+            )
+            # Delete the comment from the comments_collection
+            delete_comment = comments_collection.find_one_and_delete(
+                {"_id": ObjectId(comment_id)})
+            return {"message": "Comment deleted for comment id:"+str(comment_id)}
+        return ErrorHandler.NotFound("Comment not found")
