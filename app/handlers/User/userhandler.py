@@ -29,7 +29,7 @@ class UserManager:
         if not duplicate_user:
             hashed_password = Encryptor.hash_password(request.password)
             new_user = user_collection.insert_one(
-                {**request.model_dump(exclude={"password"}), "password": hashed_password})
+                {**request.model_dump(exclude={"password"}), "password": hashed_password, "isEmailVerified": False})
             return {"id": str(new_user.inserted_id)}
         return ErrorHandler.ALreadyExists("User already exists")
 
