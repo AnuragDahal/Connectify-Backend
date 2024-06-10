@@ -24,7 +24,6 @@ class OauthUser(BaseModel):
 
 
 class Comments(BaseModel):
-    comment_id: str = None
     post_id: str
     comment: str
     commented_by: str = None
@@ -39,6 +38,7 @@ class Post(BaseModel):
     posted_on: datetime = datetime.now(timezone.utc)
     image: Optional[str] = None
     likes: Optional[List[str]] = []
+    comments: Optional[List[str]] = []
 
 
 class UserDetails(BaseModel):
