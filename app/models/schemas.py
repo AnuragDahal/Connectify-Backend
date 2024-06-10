@@ -23,6 +23,14 @@ class OauthUser(BaseModel):
     comments_on_posts: Optional[List[str]] = []
 
 
+class Comments(BaseModel):
+    comment_id: str = None
+    post_id: str
+    comment: str
+    commented_by: str = None
+    commented_on: datetime = datetime.now(timezone.utc)
+
+
 class Post(BaseModel):
     post_id: str = None
     title: str

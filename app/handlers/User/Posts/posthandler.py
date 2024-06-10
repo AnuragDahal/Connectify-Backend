@@ -8,7 +8,7 @@ from fastapi import UploadFile
 from typing import Optional
 
 
-def gen_random_post_id():
+def gen_random_id():
     return str(uuid.uuid4())
 
 
@@ -24,7 +24,7 @@ class PostsHandler:
             # Upload the image to the server
             img_url = uploadImage(img_id, img_byte)
         new_post = post_collection.insert_one(
-            {**request.model_dump(exclude={"post_id"}), "post_id": gen_random_post_id(), "image": img_url})
+            {**request.model_dump(exclude={"post_id"}), "post_id": gen_random_id(), "image": img_url})
         return {"id": str(new_post.inserted_id)}
 
     @staticmethod
@@ -78,27 +78,6 @@ class PostsHandler:
         if post:
             return post
         raise ErrorHandler.NotFound("Post not found")
-
-    # @staticmethod
-    # def HandlePostImageUpload(post_id, file):
-    #     """
-    #     Upload an image for a post.
-    #     """
-    #     if not file:
-    #         raise ErrorHandler.Error("No image found")
-    #     post = post_collection.find_one({"post_id": post_id})
-    #     if post:
-    #         img_id = file.filename.split(".")[0][:10]
-    #         img_byte = file.file.read()
-    #         # Upload the image to the server
-    #         img_url = uploadImage(img_id, img_byte)
-    #         # insert the image url to the post_collection image field
-    #         post_collection.find_one_and_update(
-    #             {"post_id": post_id},
-    #             {"$set": {"image": img_url}}
-    #         )
-    #         return {"message": "Image uploaded successfully"}
-    #     raise ErrorHandler.NotFound("Post not found")
 
     @staticmethod
     def HandlePostImageUpload(post_id, file):

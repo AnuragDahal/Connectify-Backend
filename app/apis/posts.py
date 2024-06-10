@@ -2,6 +2,7 @@ from fastapi import APIRouter, status, UploadFile, File, Form
 from ..handlers.User.Posts.posthandler import PostsHandler
 from ..models import schemas
 from typing import List, Optional
+from ..handlers.User.Posts.commentshandler import CommentsHandler
 
 
 router = APIRouter(prefix='/api/v1/posts', tags=["Posts"])
@@ -71,3 +72,10 @@ async def get_likes_count(post_id: str):
 
     likes_count = PostsHandler.HandleLikesCounts(post_id)
     return likes_count
+
+
+@router.post("/comment", status_code=status.HTTP_200_OK)
+async def create_comment(request: schemas.Comments):
+
+    new_comment = CommentsHandler.HandleCommentCreation(request)
+    return new_comment
