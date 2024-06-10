@@ -34,10 +34,9 @@ class PostsHandler:
         """
         count = post_collection.count_documents({})
         if count > 0:
-            users = post_collection.find()
-            return users
-        else:
-            raise ErrorHandler.NotFound("No posts found")
+            posts = post_collection.find()
+            return posts
+        return ErrorHandler.NotFound("No posts found")
 
     @staticmethod
     def HandlePostDeletion(post_id):
