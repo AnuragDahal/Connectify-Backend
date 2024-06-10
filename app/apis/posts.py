@@ -6,6 +6,8 @@ from typing import List, Optional
 
 router = APIRouter(prefix='/api/v1/posts', tags=["Posts"])
 
+# Used Form data to accept the image file and other form data
+
 
 @router.post("/create", status_code=status.HTTP_200_OK)
 async def create_post(

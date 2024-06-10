@@ -13,19 +13,6 @@ def gen_random_post_id():
 
 
 class PostsHandler:
-    # @staticmethod
-    #  def HandlePostCreation(request: dict):
-    #         """
-    #         Create a new post.
-    #         """
-    #         new_post = post_collection.insert_one(
-    #             {**request, "post_id": gen_random_post_id()})
-    #         # Add the post details to the user db where the post is defined as well
-    #         # user_collection.find_one_and_update(
-    #         #     {"email": request["posted_by"]},
-    #         #     {"$push": {"posts": {**request}}}
-    #         # )
-    #         return {"id": str(new_post.inserted_id)}
     @staticmethod
     def HandlePostCreation(request: schemas.Post, image: Optional[UploadFile]):
         """
