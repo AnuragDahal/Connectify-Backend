@@ -4,6 +4,8 @@ from ....models import schemas
 from ...exception import ErrorHandler
 from pymongo import ReturnDocument
 import uuid
+from fastapi import UploadFile
+from typing import Optional
 
 
 def gen_random_post_id():
@@ -11,19 +13,31 @@ def gen_random_post_id():
 
 
 class PostsHandler:
-
+    # @staticmethod
+    #  def HandlePostCreation(request: dict):
+    #         """
+    #         Create a new post.
+    #         """
+    #         new_post = post_collection.insert_one(
+    #             {**request, "post_id": gen_random_post_id()})
+    #         # Add the post details to the user db where the post is defined as well
+    #         # user_collection.find_one_and_update(
+    #         #     {"email": request["posted_by"]},
+    #         #     {"$push": {"posts": {**request}}}
+    #         # )
+    #         return {"id": str(new_post.inserted_id)}
     @staticmethod
-    def HandlePostCreation(request: schemas.Post):
+    def HandlePostCreation(request: schemas.Post, image: Optional[UploadFile]):
         """
         Create a new post.
         """
+        if image:
+            img_id = image.filename.split(".")[0][:10]
+            img_byte = image.file.read()
+            # Upload the image to the server
+            img_url = uploadImage(img_id, img_byte)
         new_post = post_collection.insert_one(
-            {**request.model_dump(exclude={"post_id"}), "post_id": gen_random_post_id()})
-        # Add the post details to the user db where the post is defined as well
-        # user_collection.find_one_and_update(
-        #     {"email": request.posted_by},
-        #     {"$push": {"posts": {**request.model_dump(exclude=None)}}}
-        # )
+            {**request.model_dump(exclude={"post_id"}), "post_id": gen_random_post_id(), "image": img_url})
         return {"id": str(new_post.inserted_id)}
 
     @staticmethod
@@ -64,27 +78,6 @@ class PostsHandler:
             raise ErrorHandler.NotFound("User not found")
 
     @staticmethod
-    def HandlePostImageUpload(post_id, file):
-        """
-        Upload an image for a post.
-        """
-        if not file:
-            raise ErrorHandler.Error("No image found")
-        post = post_collection.find_one({"post_id": post_id})
-        if post:
-            img_id = file.filename.split(".")[0][:10]
-            img_byte = file.file.read()
-            # Upload the image to the server
-            img_url = uploadImage(img_id, img_byte)
-            # insert the image url to the post_collection image field
-            post_collection.find_one_and_update(
-                {"post_id": post_id},
-                {"$set": {"image": img_url}}
-            )
-            return {"message": "Image uploaded successfully"}
-        raise ErrorHandler.NotFound("Post not found")
-
-    @staticmethod
     def HandlePostUpdate(request: schemas.Post, post_id: str):
         """
         Update a post.
@@ -97,6 +90,43 @@ class PostsHandler:
         )
         if post:
             return post
+        raise ErrorHandler.NotFound("Post not found")
+
+    # @staticmethod
+    # def HandlePostImageUpload(post_id, file):
+    #     """
+    #     Upload an image for a post.
+    #     """
+    #     if not file:
+    #         raise ErrorHandler.Error("No image found")
+    #     post = post_collection.find_one({"post_id": post_id})
+    #     if post:
+    #         img_id = file.filename.split(".")[0][:10]
+    #         img_byte = file.file.read()
+    #         # Upload the image to the server
+    #         img_url = uploadImage(img_id, img_byte)
+    #         # insert the image url to the post_collection image field
+    #         post_collection.find_one_and_update(
+    #             {"post_id": post_id},
+    #             {"$set": {"image": img_url}}
+    #         )
+    #         return {"message": "Image uploaded successfully"}
+    #     raise ErrorHandler.NotFound("Post not found")
+
+    @staticmethod
+    def HandlePostImageUpload(post_id, file):
+        """
+        Upload an image for a post.
+        """
+        if not file:
+            raise ErrorHandler.Error("No image found")
+        post = post_collection.find_one({"post_id": post_id})
+        if post:
+            img_id = file.filename.split(".")[0][:10]
+            img_byte = file.file.read()
+            # Upload the image to the server
+            img_url = uploadImage(img_id, img_byte)
+            return {"image_url": img_url}
         raise ErrorHandler.NotFound("Post not found")
 
     @staticmethod

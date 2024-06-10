@@ -25,9 +25,9 @@ class OauthUser(BaseModel):
 
 class Post(BaseModel):
     post_id: str = None
-    title: Optional[str] = None
-    content: Optional[str] = None
-    posted_by: Optional[str] = None
+    title: str
+    content: str = None
+    posted_by: str = None
     posted_on: datetime = datetime.now(timezone.utc)
     image: Optional[str] = None
     likes: Optional[List[str]] = []

@@ -1,15 +1,24 @@
-from fastapi import APIRouter, status, UploadFile, File
+from fastapi import APIRouter, status, UploadFile, File, Form
 from ..handlers.User.Posts.posthandler import PostsHandler
 from ..models import schemas
-from typing import List
+from typing import List, Optional
+
 
 router = APIRouter(prefix='/api/v1/posts', tags=["Posts"])
 
 
 @router.post("/create", status_code=status.HTTP_200_OK)
-async def create_post(request: schemas.Post):
+async def create_post(
+    title: str = Form(...),
+    content: str = Form(None),
+    posted_by: str = Form(...),
+    image: UploadFile = File(...),
+):
 
-    new_post = PostsHandler.HandlePostCreation(request)
+    request = schemas.Post(title=title,
+                           content=content, posted_by=posted_by,
+                           )
+    new_post = PostsHandler.HandlePostCreation(request, image)
     return new_post
 
 
