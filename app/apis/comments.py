@@ -18,3 +18,10 @@ async def get_comments():
 
     comments = CommentsHandler.HandleCommentReadings()
     return comments
+
+
+@router.patch("/update", response_model=schemas.Comments, status_code=status.HTTP_200_OK)
+async def update_comment(request: schemas.Comments, comment_id):
+
+    updated_comment = CommentsHandler.HandleCommentUpdate(request, comment_id)
+    return updated_comment
