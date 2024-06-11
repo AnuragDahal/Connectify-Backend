@@ -1,4 +1,4 @@
-from typing import Optional
+from ...Auth.authhandler import Validate
 from ....core.database import user_collection
 from ...exception import ErrorHandler
 
@@ -25,8 +25,8 @@ class FriendsHandler:
     def HandleFriendAcceptance(friend_email: str, user_email: str):
         """Accept the friend request from the user.
         """
-        is_user = user_collection.find_one({"email": user_email})
-        is_friend = user_collection.find_one({"email": friend_email})
+        is_user = Validate.verify_email(user_email)
+        is_friend = Validate.verify_email(friend_email)
         if is_user and is_friend:
             # accept the request
             accept_request = user_collection.update_one(
@@ -58,3 +58,17 @@ class FriendsHandler:
         user = user_collection.find_one({"email": email})
         if user:
             return {"friend_requests": user["friend_requests"]}
+
+    @staticmethod
+    def HandlerRemoveFriendRequests(friend_email: str, user_email: str):
+        """Remove the friend_req from the friend_requests list
+        """
+        is_user = Validate.verify_email(user_email)
+        is_friend = Validate.verify_email(friend_email)
+        if is_user and is_friend:
+            remove_request = user_collection.update_one(
+                {"email": user_email}, {"$pull": {"friend_requests": friend_email}})
+            if remove_request.modified_count == 0:
+                return ErrorHandler.NotFound("Friend request not found")
+            return {"message": "Friend request removed"}
+        return ErrorHandler.NotFound("User or friend not found")

@@ -35,3 +35,11 @@ async def show_friend_requests(email: str):
 
     response = FriendsHandler.HandleShowFriendRequests(email)
     return response
+
+
+@router.delete("/remove", status_code=status.HTTP_200_OK)
+async def remove_friend_requests(friend_email: str, user_email: str):
+    """Remove the req from the friend_requests list"""
+    response = FriendsHandler.HandleRemoveFriendRequests(
+        friend_email, user_email)
+    return response
