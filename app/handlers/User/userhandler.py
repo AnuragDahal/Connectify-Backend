@@ -6,6 +6,7 @@ from pymongo import ReturnDocument
 from ...config.dependencies import verify_token
 from ...config.cloudinary_config import uploadImage
 from ...utils.passhashutils import Encryptor
+from typing import Optional
 
 
 class Validate:
@@ -19,7 +20,7 @@ class Validate:
 
 class UserManager:
     @staticmethod
-    def create(request: schemas.UserSignUp, image: UploadFile):
+    def create(request: schemas.UserSignUp, image: Optional[UploadFile]):
         """
         Insert a new user record.
         A unique `id` will be created and provided in the response.
@@ -29,13 +30,18 @@ class UserManager:
         if not duplicate_user:
             hashed_password = Encryptor.hash_password(request.password)
             # Add the image to the server and set the url in the db
-            img_id = image.filename.split(".")[0][:10]
-            img_byte = image.file.read()
-            img_url = uploadImage(img_id, img_byte)
-            #Add the img url to the user's db
-            new_user = user_collection.insert_one(
-                {**request.model_dump(exclude={"password"}), "password": hashed_password, "isEmailVerified": False, "profile_picture": img_url})
-            return {"id": str(new_user.inserted_id)}
+            if image:
+                img_id = image.filename.split(".")[0][:10]
+                img_byte = image.file.read()
+                img_url = uploadImage(img_id, img_byte)
+                # Add the img url to the user's db
+                new_user = user_collection.insert_one(
+                    {**request.model_dump(exclude={"password"}), "password": hashed_password, "isEmailVerified": False, "profile_picture": img_url})
+                return {"id": str(new_user.inserted_id)}
+            else:
+                new_user = user_collection.insert_one(
+                    {**request.model_dump(exclude={"password"}), "password": hashed_password, "isEmailVerified": False})
+                return {"id": str(new_user.inserted_id)}
         return ErrorHandler.ALreadyExists("User already exists")
 
     @staticmethod

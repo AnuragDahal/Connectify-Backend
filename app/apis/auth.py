@@ -1,5 +1,5 @@
 from fastapi.security import OAuth2PasswordRequestForm
-from fastapi import APIRouter, Depends, status, Response, Form, UploadFile
+from fastapi import APIRouter, Depends, status, Response, Form, UploadFile, File
 from ..handlers.Auth.authhandler import AuthHandler
 from ..handlers.User.userhandler import UserManager
 from ..models import schemas
@@ -14,10 +14,10 @@ async def Signup_User(
     name: str = Form(...),
     email: str = Form(...),
     password: str = Form(...),
-    image: Optional[UploadFile] = Form(None)
+    image: UploadFile = File(None)
 ):
 
-    request = schemas.UserSignup(name=name, email=email, password=password)
+    request = schemas.UserSignUp(name=name, email=email, password=password)
     user = UserManager.create(request, image)
     return user
 
