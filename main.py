@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.apis import user, auth, google, posts, comments
+from app.apis import user, auth, google, posts, comments, friends
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.database import client, db
 from starlette.middleware.sessions import SessionMiddleware
@@ -37,3 +37,4 @@ app.include_router(auth.router)
 app.include_router(google.router)
 app.include_router(posts.router)
 app.include_router(comments.router)
+app.include_router(friends.router)
