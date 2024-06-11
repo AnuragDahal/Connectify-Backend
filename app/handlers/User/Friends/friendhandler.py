@@ -60,7 +60,7 @@ class FriendsHandler:
             return {"friend_requests": user["friend_requests"]}
 
     @staticmethod
-    def HandlerRemoveFriendRequests(friend_email: str, user_email: str):
+    def HandleRemoveFriendRequests(friend_email: str, user_email: str):
         """Remove the friend_req from the friend_requests list
         """
         is_user = Validate.verify_email(user_email)
@@ -71,4 +71,18 @@ class FriendsHandler:
             if remove_request.modified_count == 0:
                 return ErrorHandler.NotFound("Friend request not found")
             return {"message": "Friend request removed"}
+        return ErrorHandler.NotFound("User or friend not found")
+
+    @staticmethod
+    def HandleRemoveFriend(friend_email: str, user_email: str):
+        """Remove the friend from the friends list
+        """
+        is_user = Validate.verify_email(user_email)
+        is_friend = Validate.verify_email(friend_email)
+        if is_user and is_friend:
+            remove_friend = user_collection.update_one(
+                {"email": user_email}, {"$pull": {"friends": friend_email}})
+            if remove_friend.modified_count == 0:
+                return ErrorHandler.NotFound("Friend not found")
+            return {"message": "Friend removed"}
         return ErrorHandler.NotFound("User or friend not found")
