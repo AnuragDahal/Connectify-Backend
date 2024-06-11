@@ -39,3 +39,24 @@ class FriendsHandler:
                 {"email": user_email}, {"$pull": {"friend_requests": friend_email}})
             return {"message": "Friend request accepted"}
         return ErrorHandler.NotFound("User or friend not found")
+
+    @staticmethod
+    def HandleShowFriends(email: str):
+        """Show all the friends of the user.
+        """
+        user = user_collection.find_one({"email": email})
+        if user:
+            if user["friends"]:
+                return user["friends"]
+            return ErrorHandler.NotFound("No friends found")
+        return ErrorHandler.NotFound("User not found")
+
+    @staticmethod
+    def HandleShowFriendRequests(email: str):
+        """Show all the friend requests of the user.
+        """
+        user = user_collection.find_one({"email": email})
+        if user:
+            if user["friend_requests"]:
+                return user["friend_requests"]
+            return ErrorHandler.NotFound("No friend requests found")
