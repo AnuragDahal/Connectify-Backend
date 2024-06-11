@@ -1,17 +1,24 @@
 from fastapi.security import OAuth2PasswordRequestForm
-from fastapi import APIRouter, Depends, status, Response
+from fastapi import APIRouter, Depends, status, Response, Form, UploadFile
 from ..handlers.Auth.authhandler import AuthHandler
 from ..handlers.User.userhandler import UserManager
 from ..models import schemas
 from ..handlers.Auth.emailHandler import EmailHandler
+from typing import Optional
 
 router = APIRouter(prefix='/api/v1', tags=["Auth"])
 
 
 @router.post("/signup", status_code=status.HTTP_201_CREATED,)
-async def Signup_User(req: schemas.UserSignUp):
+async def Signup_User(
+    name: str = Form(...),
+    email: str = Form(...),
+    password: str = Form(...),
+    image: Optional[UploadFile] = Form(None)
+):
 
-    user = UserManager.create(req)
+    request = schemas.UserSignup(name=name, email=email, password=password)
+    user = UserManager.create(request, image)
     return user
 
 
@@ -41,5 +48,3 @@ async def otp_verification(otp: str, email: str):
 
     isVerified = EmailHandler.HandleOtpVerification(otp, email)
     return isVerified
-
-
