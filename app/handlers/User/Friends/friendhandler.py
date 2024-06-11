@@ -20,3 +20,22 @@ class FriendsHandler:
                 return ErrorHandler.ALreadyExists("Friend request already sent")
             return {"message": "Friend request sent"}
         return ErrorHandler.NotFound("User or friend not found")
+
+    @staticmethod
+    def HandleFriendAcceptance(friend_email: str, user_email: str):
+        """Accept the friend request from the user.
+        """
+        is_user = user_collection.find_one({"email": user_email})
+        is_friend = user_collection.find_one({"email": friend_email})
+        if is_user and is_friend:
+            # accept the request
+            accept_request = user_collection.update_one(
+                {"email": user_email}, {"$addToSet": {"friends": friend_email}})
+            # # check if the request was accepted
+            if accept_request.modified_count == 0:
+                return ErrorHandler.ALreadyExists("Friend request already accepted")
+            # remove the request from the friend's friend_requests
+            remove_request = user_collection.update_one(
+                {"email": user_email}, {"$pull": {"friend_requests": friend_email}})
+            return {"message": "Friend request accepted"}
+        return ErrorHandler.NotFound("User or friend not found")
