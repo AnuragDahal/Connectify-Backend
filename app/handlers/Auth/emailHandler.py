@@ -104,7 +104,7 @@ class EmailHandler:
                 user_collection.update_one({"email": user_email},
                                            {"$set": {"isEmailVerified": True}})
                 # After updating the user's email verification status, delete the otp from the database
-                otp_collection.delete_one({"email:": user_email})
+                otp_collection.find_one_and_delete({"email": user_email})
                 return "Email Verified Successfully"
             else:
                 return ErrorHandler.Unauthorized("Email Verification Failed, incorrect OTP")
