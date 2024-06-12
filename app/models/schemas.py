@@ -3,6 +3,13 @@ from typing import List, Optional, Dict, Any
 from datetime import datetime, timezone
 import uuid
 from bson import ObjectId
+from enum import Enum
+
+
+class Privacy(str, Enum):
+    public = "public"
+    private = "private"
+    friends = "friends"
 
 
 class UserSignUp(BaseModel):
@@ -39,7 +46,7 @@ class Post(BaseModel):
     image: Optional[str] = None
     likes: Optional[List[str]] = []
     comments: Optional[List[str]] = []
-    privacy: str = "public"
+    privacy: Privacy = Privacy.public.value
 
 
 class UserDetails(BaseModel):
