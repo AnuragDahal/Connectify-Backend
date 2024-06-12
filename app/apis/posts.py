@@ -79,3 +79,10 @@ def get_friends_posts(user_email: str):
 
     posts = PostsHandler.HandleFriendPostsRetrieval(user_email)
     return posts
+
+
+@router.put("/privacy", status_code=status.HTTP_200_OK)
+def update_post_privacy(post_id: str, privacy: str):
+
+    post = PostsHandler.HandlePostPrivacyUpdate(post_id, privacy)
+    return post

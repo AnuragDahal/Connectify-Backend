@@ -30,12 +30,15 @@ class PostsHandler:
     @staticmethod
     def HandlePublicPostReadings():
         """
-        Get all the posts.
+        Get all the public posts.
         """
-        count = post_collection.count_documents({})
-        if count > 0:
-            posts = post_collection.find()
-            return posts
+        documents = list(post_collection.find({}))
+        if documents:
+            public_posts = [
+                document for document in documents if document["privacy"] == "public"]
+            if public_posts:
+                return public_posts
+            return ErrorHandler.NotFound("No public posts found")
         return ErrorHandler.NotFound("No posts found")
 
     @staticmethod
@@ -137,3 +140,14 @@ class PostsHandler:
                 return friends_posts
             return ErrorHandler.NotFound("No posts found for friends")
         return ErrorHandler.NotFound("No posts found")
+
+    @staticmethod
+    def HandlePostPrivacyUpdate(post_id: str, privacy: str):
+        """Change the privacy of your posts to public, friends or private."""
+        post = post_collection.find_one({"post_id": post_id})
+        if post and privacy in ["public", "friends", "private"]:
+            post_privacy = post_collection.find_one_and_update(
+                {"post_id": post_id},
+                {"$set": {"privacy": privacy}}, return_document=ReturnDocument.AFTER)
+            return post_privacy
+        return ErrorHandler.NotFound("Post with found")
