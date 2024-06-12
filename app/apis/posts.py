@@ -73,3 +73,9 @@ async def get_likes_count(post_id: str):
     likes_count = PostsHandler.HandleLikesCounts(post_id)
     return likes_count
 
+
+@router.get("/friends", status_code=status.HTTP_200_OK)
+def get_friends_posts(user_email: str):
+
+    posts = PostsHandler.HandleFriendPostsRetrieval(user_email)
+    return posts

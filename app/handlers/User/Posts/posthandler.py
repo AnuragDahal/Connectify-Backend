@@ -24,11 +24,11 @@ class PostsHandler:
             # Upload the image to the server
             img_url = uploadImage(img_id, img_byte)
         new_post = post_collection.insert_one(
-            {**request.model_dump(exclude={"post_id"}), "post_id": gen_random_id(), "image": img_url})
+            {**request.model_dump(exclude={"post_id"}), "post_id": gen_random_id(), "image": img_url, "privacy": "public"})
         return {"id": str(new_post.inserted_id)}
 
     @staticmethod
-    def HandlePostReadings():
+    def HandlePublicPostReadings():
         """
         Get all the posts.
         """
@@ -122,3 +122,18 @@ class PostsHandler:
                 count_likes += 1
             return {"likes": count_likes}
         return ErrorHandler.NotFound("Post not found")
+
+    @staticmethod
+    def HandleFriendPostsRetrieval(user_email: str):
+        """
+        Get all the public posts.
+        """
+        documents = list(post_collection.find({}))
+        print(type(documents))
+        if documents:
+            friends_posts = [document for document in documents if
+                             (document["privacy"] == "friends" and user_email in document["friends"])]
+            if friends_posts:
+                return friends_posts
+            return ErrorHandler.NotFound("No posts found for friends")
+        return ErrorHandler.NotFound("No posts found")
