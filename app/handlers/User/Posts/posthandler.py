@@ -151,9 +151,13 @@ class PostsHandler:
     def HandlePostPrivacyUpdate(post_id: str, privacy: str):
         """Change the privacy of your posts to public, friends or private."""
         post = post_collection.find_one({"_id": ObjectId(post_id)})
-        if post and privacy in ["public", "friends", "private"]:
+        if post is not None:
+            if privacy not in ["public", "friends", "private"]:
+                return ErrorHandler.Error("Invalid privacy type")
             post_privacy = post_collection.find_one_and_update(
                 {"_id": ObjectId(post_id)},
                 {"$set": {"privacy": privacy}}, return_document=ReturnDocument.AFTER)
-            return post_privacy
-        return ErrorHandler.NotFound("Post not found")
+            return {"message": "Post privacy updated to "+privacy}
+            # return post_privacy
+        else:
+            return ErrorHandler.NotFound("Post not found")

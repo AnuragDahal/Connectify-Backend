@@ -13,7 +13,7 @@ class CommentsHandler:
         Create a comment.
         """
 
-        if not post_collection.find_one({"post_id": request.post_id}):
+        if not post_collection.find_one({"_id": ObjectId(request.post_id)}):
             return ErrorHandler.NotFound("Post not found")
         new_comment = comments_collection.insert_one(
             {**request.model_dump(exclude=None)})
@@ -41,7 +41,7 @@ class CommentsHandler:
     def HandleCommentUpdate(request: schemas.Comments, comment_id: str):
         '''Update the existing comment'''
         # Check if the post exists or not
-        is_post = post_collection.find_one({"post_id": request.post_id})
+        is_post = post_collection.find_one({"_id": ObjectId(request.post_id)})
         if is_post:
             updated_comment = comments_collection.find_one_and_update(
                 {"_id": ObjectId(comment_id)},
