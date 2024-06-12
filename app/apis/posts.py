@@ -15,7 +15,7 @@ async def create_post(
     title: str = Form(...),
     content: str = Form(None),
     posted_by: str = Form(...),
-    image: UploadFile = File(...),
+    image: UploadFile = File(None),
 ):
 
     request = schemas.Post(title=title,
@@ -28,7 +28,7 @@ async def create_post(
 @router.get("/read", response_model=List[schemas.Post], status_code=status.HTTP_200_OK)
 async def get_posts():
 
-    posts = PostsHandler.HandlePostReadings()
+    posts = PostsHandler.HandlePublicPostReadings()
     return posts
 
 

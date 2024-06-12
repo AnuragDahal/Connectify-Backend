@@ -23,8 +23,10 @@ class PostsHandler:
             img_byte = image.file.read()
             # Upload the image to the server
             img_url = uploadImage(img_id, img_byte)
+            save_post = post_collection.insert_one(
+                {**request.model_dump(exclude={"post_id"}), "image": img_url, "privacy": "public"})
         new_post = post_collection.insert_one(
-            {**request.model_dump(exclude={"post_id"}), "post_id": gen_random_id(), "image": img_url, "privacy": "public"})
+            {**request.model_dump(exclude={"post_id"}), "privacy": "public"})
         return {"id": str(new_post.inserted_id)}
 
     @staticmethod

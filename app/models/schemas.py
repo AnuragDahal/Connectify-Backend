@@ -38,7 +38,6 @@ class Comments(BaseModel):
 
 
 class Post(BaseModel):
-    post_id: str = None
     title: str
     content: str = None
     posted_by: str = None
