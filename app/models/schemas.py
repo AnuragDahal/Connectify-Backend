@@ -39,6 +39,7 @@ class Post(BaseModel):
     image: Optional[str] = None
     likes: Optional[List[str]] = []
     comments: Optional[List[str]] = []
+    privacy: str = "public"
 
 
 class UserDetails(BaseModel):
