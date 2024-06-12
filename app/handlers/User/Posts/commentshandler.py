@@ -20,7 +20,7 @@ class CommentsHandler:
         # Add the comment_id to the post_id in the posts collection
         comment_id = str(new_comment.inserted_id)
         post_collection.find_one_and_update({
-            "post_id": request.post_id},
+            "_id": ObjectId(request.post_id)},
             {"$addToSet": {'comments': comment_id}}
         )
 
