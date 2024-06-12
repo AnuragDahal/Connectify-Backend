@@ -1,5 +1,5 @@
 from app.config.cloudinary_config import uploadImage
-from ....core.database import post_collection, user_collection
+from ....core.database import post_collection, user_collection, comments_collection
 from ....models import schemas
 from ...exception import ErrorHandler
 from pymongo import ReturnDocument
@@ -46,9 +46,12 @@ class PostsHandler:
         """
         Delete a post.
         """
-        post = post_collection.find_one_and_delete({"post_id": post_id})
+        post = post_collection.find_one({"post_id": post_id})
         if post:
-            return {"message": "Post deleted for post id:"+str(post_id)}
+            # Delete all the comments for the post and then delete the post
+            comments_collection.delete_many({"post_id": post_id})
+            post_collection.delete_one({"post_id": post_id})
+            return {"message": "Post and comments deleted for post id:"+str(post_id)}
         else:
             raise ErrorHandler.NotFound("Post not found")
 
