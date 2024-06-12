@@ -6,6 +6,7 @@ from pymongo import ReturnDocument
 import uuid
 from fastapi import UploadFile
 from typing import Optional
+from bson import ObjectId
 
 
 def gen_random_id():
@@ -24,9 +25,9 @@ class PostsHandler:
             # Upload the image to the server
             img_url = uploadImage(img_id, img_byte)
             save_post = post_collection.insert_one(
-                {**request.model_dump(exclude={"post_id"}), "image": img_url, "privacy": "public"})
+                {**request.model_dump(exclude=None), "image": img_url, "privacy": "public"})
         new_post = post_collection.insert_one(
-            {**request.model_dump(exclude={"post_id"}), "privacy": "public"})
+            {**request.model_dump(exclude=None), "privacy": "public"})
         return {"id": str(new_post.inserted_id)}
 
     @staticmethod
@@ -48,11 +49,11 @@ class PostsHandler:
         """
         Delete a post.
         """
-        post = post_collection.find_one({"post_id": post_id})
+        post = post_collection.find_one({"_id": ObjectId(post_id)})
         if post:
             # Delete all the comments for the post and then delete the post
-            comments_collection.delete_many({"post_id": post_id})
-            post_collection.delete_one({"post_id": post_id})
+            comments_collection.delete_many({"post_id": ObjectId(post_id)})
+            post_collection.delete_one({"post_id": ObjectId(post_id)})
             return {"message": "Post and comments deleted for post id:"+str(post_id)}
         else:
             raise ErrorHandler.NotFound("Post not found")
@@ -77,9 +78,9 @@ class PostsHandler:
         Update a post.
         """
         post = post_collection.find_one_and_update(
-            {"post_id": post_id},
+            {"post_id": ObjectId(post_id)},
             {"$set": {
-                **request.model_dump(exclude={"post_id"}), "post_id": post_id}},
+                **request.model_dump(exclude={"post_id"}), "post_id": ObjectId(post_id)}},
             return_document=ReturnDocument.AFTER
         )
         if post:
@@ -93,7 +94,7 @@ class PostsHandler:
         """
         if not file:
             raise ErrorHandler.Error("No image found")
-        post = post_collection.find_one({"post_id": post_id})
+        post = post_collection.find_one({"post_id": ObjectId(post_id)})
         if post:
             img_id = file.filename.split(".")[0][:10]
             img_byte = file.file.read()
@@ -107,12 +108,12 @@ class PostsHandler:
         """
         Like a post.
         """
-        post = post_collection.find_one({"post_id": post_id})
+        post = post_collection.find_one({"post_id": ObjectId(post_id)})
         if post:
             if email in post["likes"]:
                 raise ErrorHandler.Error("Post already liked")
             post_collection.find_one_and_update(
-                {"post_id": post_id},
+                {"post_id": ObjectId(post_id)},
                 {"$addToSet": {"likes": email}}
             )
             return {"message": "Post liked"}
@@ -123,7 +124,7 @@ class PostsHandler:
         """
         Get the number of likes for a post.
         """
-        post = post_collection.find_one({"post_id": post_id})
+        post = post_collection.find_one({"post_id": ObjectId(post_id)})
         if post:
             count_likes = 0
             for like in post["likes"]:
@@ -149,10 +150,10 @@ class PostsHandler:
     @staticmethod
     def HandlePostPrivacyUpdate(post_id: str, privacy: str):
         """Change the privacy of your posts to public, friends or private."""
-        post = post_collection.find_one({"post_id": post_id})
+        post = post_collection.find_one({"post_id": ObjectId(post_id)})
         if post and privacy in ["public", "friends", "private"]:
             post_privacy = post_collection.find_one_and_update(
-                {"post_id": post_id},
+                {"post_id": ObjectId(post_id)},
                 {"$set": {"privacy": privacy}}, return_document=ReturnDocument.AFTER)
             return post_privacy
-        return ErrorHandler.NotFound("Post with found")
+        return ErrorHandler.NotFound("Post not found")
