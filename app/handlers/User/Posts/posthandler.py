@@ -121,8 +121,11 @@ class PostsHandler:
         if Validate.verify_email(email):
             post = post_collection.find_one({"_id": ObjectId(post_id)})
             if post:
+                # If the user has liked the post already then remove the like from the post
                 if email in post["likes"]:
-                    raise ErrorHandler.Error("Post already liked")
+                    post_collection.update_one({"_id": ObjectId(post_id)},
+                                               {"$pull": {"likes": email}})
+                    return {"message": "Post unliked"}
                 # use update_one if no return is needed and use find_one_and_update if return is needed
                 post_collection.update_one(
                     {"_id": ObjectId(post_id)},
@@ -130,7 +133,7 @@ class PostsHandler:
                 )
                 return {"message": "Post liked"}
             return ErrorHandler.NotFound("Post not found")
-        return ErrorHandler.NotFound(f"User with email {email} not found in the")
+        return ErrorHandler.NotFound(f"User with email {email} not found in the database")
 
     @staticmethod
     def HandleLikesCounts(post_id: str):
