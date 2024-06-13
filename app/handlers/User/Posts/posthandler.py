@@ -20,15 +20,18 @@ class PostsHandler:
         """
         Create a new post.
         """
+        post_data = {**request.model_dump(exclude=None), "privacy": "public"}
+
         if image:
             img_id = image.filename.split(".")[0][:10]
             img_byte = image.file.read()
             # Upload the image to the server
             img_url = uploadImage(img_id, img_byte)
-            save_post = post_collection.insert_one(
-                {**request.model_dump(exclude=None), "image": img_url, "privacy": "public"})
-        new_post = post_collection.insert_one(
-            {**request.model_dump(exclude=None), "privacy": "public"})
+            post_data["image"] = img_url
+
+        new_post = post_collection.insert_one(post_data)
+        user_collection.update_one({"email": request.posted_by},
+                                   {"$addToSet": {"posts": str(new_post.inserted_id)}})
         return {"id": str(new_post.inserted_id)}
 
     @staticmethod
