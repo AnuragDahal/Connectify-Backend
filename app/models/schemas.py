@@ -2,7 +2,6 @@ from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 from datetime import datetime, timezone
 import uuid
-from bson import ObjectId
 from enum import Enum
 
 
