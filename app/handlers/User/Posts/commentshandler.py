@@ -1,4 +1,4 @@
-from ....core.database import comments_collection, post_collection
+from ....core.database import comments_collection, post_collection ,user_collection
 from ....models import schemas
 from pymongo import ReturnDocument
 from ...exception import ErrorHandler
@@ -22,6 +22,10 @@ class CommentsHandler:
         post_collection.find_one_and_update({
             "_id": ObjectId(request.post_id)},
             {"$addToSet": {'comments': comment_id}}
+        )
+        user_collection.find_one_and_update(
+            {"email": request.commented_by},
+            {"$addToSet": {"commented": comment_id}}
         )
 
         return {"id": str(new_comment.inserted_id)}
