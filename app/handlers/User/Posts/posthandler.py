@@ -124,7 +124,7 @@ class PostsHandler:
                 # If the user has liked the post already then remove the like from the post
                 if email in post["likes"]:
                     post_collection.update_one({"_id": ObjectId(post_id)},
-                                               {"$pull": {"likes": email}})
+                                               {"$unset": {"likes": email}})
                     return {"message": "Post unliked"}
                 # use update_one if no return is needed and use find_one_and_update if return is needed
                 post_collection.update_one(
