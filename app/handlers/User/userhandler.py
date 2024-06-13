@@ -7,6 +7,7 @@ from ...config.dependencies import verify_token
 from ...config.cloudinary_config import uploadImage
 from ...utils.passhashutils import Encryptor
 from typing import Optional
+from ...core.database import post_collection, comments_collection
 
 
 class Validate:
@@ -37,7 +38,7 @@ class UserManager:
                 img_url = uploadImage(img_id, img_byte)
                 # Add the img url to the user's db
                 new_user = user_collection.insert_one(
-                    {**request.model_dump(exclude={"password"}), "password": hashed_password,"profile_picture": img_url})
+                    {**request.model_dump(exclude={"password"}), "password": hashed_password, "profile_picture": img_url})
                 return {"id": str(new_user.inserted_id)}
             else:
                 new_user = user_collection.insert_one(
@@ -91,6 +92,9 @@ class UserManager:
         user_email = await verify_token(request)
         # Delete the user through the email
         deleted_user = user_collection.delete_one({"email": user_email})
+        # Delete all the data sets associated with the user such as posts, comments, etc.
+        comments_collection.delete_many({"commented_by":user_email})
+        post_collection.delete_many({"posted_by":user_email})
         res.delete_cookie('token')
         if deleted_user.deleted_count == 0:
             raise ErrorHandler.NotFound("User not found")
