@@ -55,9 +55,12 @@ class FriendsHandler:
     def HandleShowFriendRequests(email: str):
         """Show all the friend requests of the user.
         """
-        user = user_collection.find_one({"email": email})
-        if user:
-            return {"friend_requests": user["friend_requests"]}
+        user_doc = user_collection.find_one({"email": email})
+        if user_doc:
+            if user_doc['friend_requests']:
+                return user_doc['friend_requests']
+            return ErrorHandler.NotFound("No friend requests found")
+        return ErrorHandler.NotFound("User not found")
 
     @staticmethod
     def HandleRemoveFriendRequests(friend_email: str, user_email: str):
