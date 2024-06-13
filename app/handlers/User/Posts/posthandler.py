@@ -64,12 +64,13 @@ class PostsHandler:
         """
         Get all the posts of a specific user.
         """
-        user = user_collection.find_one({"email": email})
-        if user:
-            posts = post_collection.find({"posted_by": email})
-            if not posts:
+        if Validate.verify_email(email):
+            post_count = post_collection.count_documents({"posted_by": email})
+            if post_count == 0:
                 raise ErrorHandler.NotFound("No posts found for user")
-            return posts
+            else:
+                posts_cursor = post_collection.find({"posted_by": email})
+                return posts_cursor
         else:
             raise ErrorHandler.NotFound("User not found")
 

@@ -20,11 +20,12 @@ class Validate:
 
 class UserManager:
     @staticmethod
-    def create(request: schemas.UserSignUp, image: Optional[UploadFile]):
+    def create(request: schemas.UserDetails, image: Optional[UploadFile]):
         """
         Insert a new user record.
         A unique `id` will be created and provided in the response.
         """
+        print(request.email)
         # duplicate_user = user_collection.find_one({"email": request.email})
         duplicate_user = Validate.verify_email(request.email)
         if not duplicate_user:
@@ -36,7 +37,7 @@ class UserManager:
                 img_url = uploadImage(img_id, img_byte)
                 # Add the img url to the user's db
                 new_user = user_collection.insert_one(
-                    {**request.model_dump(exclude={"password"}), "password": hashed_password, "isEmailVerified": False, "profile_picture": img_url})
+                    {**request.model_dump(exclude={"password"}), "password": hashed_password,"profile_picture": img_url})
                 return {"id": str(new_user.inserted_id)}
             else:
                 new_user = user_collection.insert_one(

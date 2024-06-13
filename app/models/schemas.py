@@ -50,7 +50,8 @@ class Post(BaseModel):
 class UserDetails(BaseModel):
     name: str
     email: str
-    isEmailVerified: Optional[bool]
+    password: str
+    isEmailVerified: Optional[bool] = False
     friends: Optional[List[str]] = []
     friend_requests: Optional[List[str]] = []
     profile_picture: Optional[str] = str()

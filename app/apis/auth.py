@@ -17,7 +17,7 @@ async def Signup_User(
     image: UploadFile = File(None)
 ):
 
-    request = schemas.UserSignUp(name=name, email=email, password=password)
+    request = schemas.UserDetails(name=name, email=email, password=password)
     user = UserManager.create(request, image)
     return user
 
