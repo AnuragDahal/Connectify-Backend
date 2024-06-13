@@ -26,23 +26,21 @@ class UserManager:
         Insert a new user record.
         A unique `id` will be created and provided in the response.
         """
-        print(request.email)
-        # duplicate_user = user_collection.find_one({"email": request.email})
         duplicate_user = Validate.verify_email(request.email)
         if not duplicate_user:
             hashed_password = Encryptor.hash_password(request.password)
             # Add the image to the server and set the url in the db
             if image:
                 img_id = image.filename.split(".")[0][:10]
-                img_byte = image.file.read()
-                img_url = uploadImage(img_id, img_byte)
+                img_byte = image.file.read()#blocking code 
+                img_url = uploadImage(img_id, img_byte)#blocking code
                 # Add the img url to the user's db
                 new_user = user_collection.insert_one(
-                    {**request.model_dump(exclude={"password"}), "password": hashed_password, "profile_picture": img_url})
+                    {**request.model_dump(exclude={"password"}), "password": hashed_password, "profile_picture": img_url})#blocking code
                 return {"id": str(new_user.inserted_id)}
             else:
                 new_user = user_collection.insert_one(
-                    {**request.model_dump(exclude={"password"}), "password": hashed_password, "isEmailVerified": False})
+                    {**request.model_dump(exclude={"password"}), "password": hashed_password, "isEmailVerified": False})#blocking code
                 return {"id": str(new_user.inserted_id)}
         return ErrorHandler.ALreadyExists("User already exists")
 
@@ -68,7 +66,7 @@ class UserManager:
         # Check email from the cookie and the email to be updated are same
         if old_email != logged_in_user_email:
             raise ErrorHandler.Forbidden(
-                "You are not authotrized to perform this action")
+                "You are not authorized to perform this action")
             # check if the new email entered is available or not
         is_available = user_collection.find_one({"email": new_email.email})
         if not is_available:

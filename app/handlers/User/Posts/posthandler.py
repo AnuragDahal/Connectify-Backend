@@ -16,19 +16,19 @@ def gen_random_id():
 
 class PostsHandler:
     @staticmethod
-    def HandlePostCreation(request: schemas.Post, image: Optional[UploadFile]):
+    def HandlePostCreation(request: schemas.Post, images: Optional[UploadFile]):
         """
         Create a new post.
         """
         post_data = {**request.model_dump(exclude=None), "privacy": "public"}
-
-        if image:
-            img_id = image.filename.split(".")[0][:10]
-            img_byte = image.file.read()
-            # Upload the image to the server
-            img_url = uploadImage(img_id, img_byte)
-            post_data["image"] = img_url
-
+        if images:
+            for image in images:
+                img_id = image.filename.split(".")[0][:10]
+                img_byte = image.file.read()
+                # Upload the image to the server
+                img_url = uploadImage(img_id, img_byte)
+                image_list = post_data["images"]
+                image_list.append(img_url)
         new_post = post_collection.insert_one(post_data)
         user_collection.update_one({"email": request.posted_by},
                                    {"$addToSet": {"posts": str(new_post.inserted_id)}})
@@ -78,19 +78,22 @@ class PostsHandler:
             raise ErrorHandler.NotFound("User not found")
 
     @staticmethod
-    def HandlePostUpdate(request: schemas.Post, post_id: str):
+    def HandlePostUpdate(request: schemas.Post, post_id: str, image: Optional[UploadFile]):
         """
         Update a post.
         """
-        post = post_collection.find_one_and_update(
-            {"_id": ObjectId(post_id)},
-            {"$set": {
-                **request.model_dump(exclude=None), "_id": ObjectId(post_id)}},
-            return_document=ReturnDocument.AFTER
-        )
-        if post:
-            return post
-        raise ErrorHandler.NotFound("Post not found")
+        post_data = {**request.model_dump(exclude=None), "privacy": "public"}
+        if image:
+            img_id = image.filename.split(".")[0][:10]
+            img_byte = image.file.read()
+            # Upload the image to the server
+            img_url = uploadImage(img_id, img_byte)
+            post_data["image"] = img_url
+        new_post = post_collection.update_one(
+            {"_id": ObjectId(post_id)}, {"$set": post_data})
+        user_collection.update_one({"email": request.posted_by},
+                                   {"$addToSet": {"posts": str(new_post.inserted_id)}})
+        return {"id": str(new_post.inserted_id)}
 
     @staticmethod
     def HandlePostImageUpload(post_id, file):

@@ -41,7 +41,7 @@ class Post(BaseModel):
     content: str = None
     posted_by: str = None
     posted_on: datetime = datetime.now(timezone.utc)
-    image: Optional[str] = None
+    images: Optional[List[str]] = []
     likes: Optional[List[str]] = []
     comments: Optional[List[str]] = []
     privacy: Privacy = Privacy.public.value

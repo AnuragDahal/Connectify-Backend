@@ -15,7 +15,7 @@ async def create_post(
     title: str = Form(...),
     content: str = Form(None),
     posted_by: str = Form(...),
-    image: UploadFile = File(None),
+    image: List[UploadFile] = File(...),
 ):
 
     request = schemas.Post(title=title,
@@ -54,9 +54,26 @@ async def upload_post_image(post_id: str, file: UploadFile = File(...)):
 
 
 @router.patch("/update", response_model=schemas.Post, status_code=status.HTTP_200_OK)
-async def update_post(request: schemas.Post, post_id: str):
+async def update_post(
+    post_id: str,
+    title: str = Form(None),
+    content: str = Form(None),
+    image: List[UploadFile] = File(None),
+):
+    request = schemas.Post(title=title, content=content)
+    updated_post = PostsHandler.HandlePostUpdate(request, post_id, image)
+    return updated_post
 
-    updated_post = PostsHandler.HandlePostUpdate(request, post_id)
+
+@router.patch("/update", response_model=schemas.Post, status_code=status.HTTP_200_OK)
+async def update_post(
+    post_id: str,
+    title: str = Form(None),
+    content: str = Form(None),
+    images: List[UploadFile] = File(None),
+):
+    request = schemas.Post(title=title, content=content)
+    updated_post = PostsHandler.HandlePostUpdate(request, post_id, images)
     return updated_post
 
 
@@ -81,7 +98,7 @@ def get_friends_posts(user_email: str):
     return posts
 
 
-@router.put("/privacy",status_code=status.HTTP_200_OK)
+@router.put("/privacy", status_code=status.HTTP_200_OK)
 def update_post_privacy(post_id: str, privacy: str):
 
     post = PostsHandler.HandlePostPrivacyUpdate(post_id, privacy)
