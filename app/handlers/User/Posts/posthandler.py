@@ -3,6 +3,7 @@ from ....core.database import post_collection, user_collection, comments_collect
 from ....models import schemas
 from ...exception import ErrorHandler
 from pymongo import ReturnDocument
+from ...Auth.authhandler import Validate
 import uuid
 from fastapi import UploadFile
 from typing import Optional
@@ -92,32 +93,44 @@ class PostsHandler:
         """
         Upload an image for a post.
         """
-        if not file:
-            raise ErrorHandler.Error("No image found")
-        post = post_collection.find_one({"_id": ObjectId(post_id)})
-        if post:
-            img_id = file.filename.split(".")[0][:10]
-            img_byte = file.file.read()
-            # Upload the image to the server
-            img_url = uploadImage(img_id, img_byte)
-            return {"image_url": img_url}
-        raise ErrorHandler.NotFound("Post not found")
+        try:
+            if not file:
+                raise ErrorHandler.Error("No image found")
+            post = post_collection.find_one({"_id": ObjectId(post_id)})
+            if post:
+                img_id = file.filename.split(".")[0][:10]
+                img_byte = file.file.read()
+                # Upload the image to the server
+                img_url = uploadImage(img_id, img_byte)
+                # Put the image in the document of the post
+                post_collection.find_one_and_update(
+                    {"_id": ObjectId(post_id)},
+                    {"$set": {"image": img_url}}
+                )
+                return {"image_url": img_url}
+            raise ErrorHandler.NotFound("Post not found")
+        except Exception as e:
+            raise ErrorHandler.Error(str(e))
 
     @staticmethod
     def HandlePostLike(post_id, email):
         """
         Like a post.
         """
-        post = post_collection.find_one({"_id": ObjectId(post_id)})
-        if post:
-            if email in post["likes"]:
-                raise ErrorHandler.Error("Post already liked")
-            post_collection.find_one_and_update(
-                {"_id": ObjectId(post_id)},
-                {"$addToSet": {"likes": email}}
-            )
-            return {"message": "Post liked"}
-        return ErrorHandler.NotFound("Post not found")
+        # Check if the user req to like post exists or not
+        if Validate.verify_email(email):
+            post = post_collection.find_one({"_id": ObjectId(post_id)})
+            if post:
+                if email in post["likes"]:
+                    raise ErrorHandler.Error("Post already liked")
+                # use update_one if no return is needed and use find_one_and_update if return is needed
+                post_collection.update_one(
+                    {"_id": ObjectId(post_id)},
+                    {"$addToSet": {"likes": email}}
+                )
+                return {"message": "Post liked"}
+            return ErrorHandler.NotFound("Post not found")
+        return ErrorHandler.NotFound(f"User with email {email} not found in the")
 
     @staticmethod
     def HandleLikesCounts(post_id: str):
