@@ -31,6 +31,9 @@ class FriendsHandler:
             # accept the request
             accept_request = user_collection.update_one(
                 {"email": user_email}, {"$addToSet": {"friends": friend_email}})
+            # Add the user_email to the friend's friends list
+            user_collection.update_one({"email": friend_email},
+                                       {"$addToSet": {"friends": user_email}})
             # # check if the request was accepted
             if accept_request.modified_count == 0:
                 return ErrorHandler.ALreadyExists("Friend request already accepted")
