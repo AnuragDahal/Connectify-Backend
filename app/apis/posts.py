@@ -65,18 +65,6 @@ async def update_post(
     return updated_post
 
 
-@router.patch("/update", response_model=schemas.Post, status_code=status.HTTP_200_OK)
-async def update_post(
-    post_id: str,
-    title: str = Form(None),
-    content: str = Form(None),
-    images: List[UploadFile] = File(None),
-):
-    request = schemas.Post(title=title, content=content)
-    updated_post = PostsHandler.HandlePostUpdate(request, post_id, images)
-    return updated_post
-
-
 @router.patch("/like", status_code=status.HTTP_200_OK)
 async def like_post(post_id: str, liked_by_user: str):
 
