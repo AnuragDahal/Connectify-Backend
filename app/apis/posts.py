@@ -15,7 +15,7 @@ async def create_post(
     title: str = Form(...),
     content: str = Form(None),
     posted_by: str = Form(...),
-    image: List[UploadFile] = File(...),
+    image: List[UploadFile] = File([]),
 ):
 
     request = schemas.Post(title=title,
@@ -53,15 +53,16 @@ async def upload_post_image(post_id: str, file: UploadFile = File(...)):
     return upload_file
 
 
-@router.patch("/update", response_model=schemas.Post, status_code=status.HTTP_200_OK)
+@router.patch("/update", response_model=schemas.PostUpdate, status_code=status.HTTP_200_OK)
 async def update_post(
     post_id: str,
-    title: str = Form(None),
-    content: str = Form(None),
-    image: List[UploadFile] = File(None),
+    title: Optional[str] = Form(None),
+    content: Optional[str]= Form(None),
+    images: List[UploadFile] = File([]),
 ):
-    request = schemas.Post(title=title, content=content)
-    updated_post = PostsHandler.HandlePostUpdate(request, post_id, image)
+
+    request = schemas.PostUpdate(title=title, content=content)
+    updated_post = PostsHandler.HandlePostUpdate(request, post_id, images)
     return updated_post
 
 

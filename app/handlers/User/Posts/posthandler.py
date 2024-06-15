@@ -6,8 +6,9 @@ from pymongo import ReturnDocument
 from ...Auth.authhandler import Validate
 import uuid
 from fastapi import UploadFile
-from typing import Optional
+from typing import Optional, List
 from bson import ObjectId
+from datetime import datetime, timezone
 
 
 def gen_random_id():
@@ -16,7 +17,7 @@ def gen_random_id():
 
 class PostsHandler:
     @staticmethod
-    def HandlePostCreation(request: schemas.Post, images: Optional[UploadFile]):
+    def HandlePostCreation(request: schemas.Post, images: Optional[List[UploadFile]]):
         """
         Create a new post.
         """
@@ -78,22 +79,33 @@ class PostsHandler:
             raise ErrorHandler.NotFound("User not found")
 
     @staticmethod
-    def HandlePostUpdate(request: schemas.Post, post_id: str, image: Optional[UploadFile]):
+    def HandlePostUpdate(request: schemas.PostUpdate, post_id: str, images: Optional[List[UploadFile]]):
         """
         Update a post.
         """
-        post_data = {**request.model_dump(exclude=None), "privacy": "public"}
-        if image:
-            img_id = image.filename.split(".")[0][:10]
-            img_byte = image.file.read()
-            # Upload the image to the server
-            img_url = uploadImage(img_id, img_byte)
-            post_data["image"] = img_url
-        new_post = post_collection.update_one(
-            {"_id": ObjectId(post_id)}, {"$set": post_data})
-        user_collection.update_one({"email": request.posted_by},
-                                   {"$addToSet": {"posts": str(new_post.inserted_id)}})
-        return {"id": str(new_post.inserted_id)}
+        # Fetch the existing post
+        existing_post = post_collection.find_one({"_id": ObjectId(post_id)})
+
+        # Initialize images
+        images_list = existing_post["images"] if not images else []
+
+        # Update the post with the new data
+        post_data = {
+            "title": request.title if request.title else existing_post["title"],
+            "content": request.content if request.content else existing_post["content"],
+            "images": images_list,
+            "posted_on": datetime.now(timezone.utc),
+        }
+        if images:
+            for image in images:
+                img_id = image.filename.split(".")[0][:10]
+                img_byte = image.file.read()
+                # Upload the image to the server
+                img_url = uploadImage(img_id, img_byte)
+                post_data["images"].append(img_url)
+        updated_post = post_collection.find_one_and_update(
+            {"_id": ObjectId(post_id)}, {"$set": post_data}, return_document=ReturnDocument.AFTER)
+        return updated_post
 
     @staticmethod
     def HandlePostImageUpload(post_id, file):

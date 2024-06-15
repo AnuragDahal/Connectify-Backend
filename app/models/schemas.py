@@ -47,6 +47,12 @@ class Post(BaseModel):
     privacy: Privacy = Privacy.public.value
 
 
+class PostUpdate(BaseModel):
+    title: Optional[str] = None
+    content: Optional[str] = None
+    images: Optional[List[str]] = []
+
+
 class UserDetails(BaseModel):
     name: str
     email: str
