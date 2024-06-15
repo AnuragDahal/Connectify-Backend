@@ -17,7 +17,7 @@ def gen_random_id():
 
 class PostsHandler:
     @staticmethod
-    def HandlePostCreation(request: schemas.Post, images: Optional[List[UploadFile]]):
+    async def HandlePostCreation(request: schemas.Post, images: Optional[List[UploadFile]]):
         """
         Create a new post.
         """
@@ -25,22 +25,22 @@ class PostsHandler:
         if images:
             for image in images:
                 img_id = image.filename.split(".")[0][:10]
-                img_byte = image.file.read()
+                img_byte = await image.read()
                 # Upload the image to the server
                 img_url = uploadImage(img_id, img_byte)
                 image_list = post_data["images"]
                 image_list.append(img_url)
-        new_post = post_collection.insert_one(post_data)
-        user_collection.update_one({"email": request.posted_by},
-                                   {"$addToSet": {"posts": str(new_post.inserted_id)}})
+        new_post = await post_collection.insert_one(post_data)
+        await user_collection.update_one({"email": request.posted_by},
+                                         {"$addToSet": {"posts": str(new_post.inserted_id)}})
         return {"id": str(new_post.inserted_id)}
 
     @staticmethod
-    def HandlePublicPostReadings():
+    async def HandlePublicPostReadings():
         """
         Get all the public posts.
         """
-        documents = list(post_collection.find({}))
+        documents = await post_collection.find({}).to_list(length=None)
         if documents:
             public_posts = [
                 document for document in documents if document["privacy"] == "public"]
@@ -50,41 +50,42 @@ class PostsHandler:
         return ErrorHandler.NotFound("No posts found")
 
     @staticmethod
-    def HandlePostDeletion(post_id):
+    async def HandlePostDeletion(post_id):
         """
         Delete a post.
         """
-        post = post_collection.find_one({"_id": ObjectId(post_id)})
+        post = await post_collection.find_one({"_id": ObjectId(post_id)})
         if post:
             # Delete all the comments for the post and then delete the post
-            comments_collection.delete_many({"post_id": ObjectId(post_id)})
-            post_collection.delete_one({"_id": ObjectId(post_id)})
+            await comments_collection.delete_many({"post_id": ObjectId(post_id)})
+            await post_collection.delete_one({"_id": ObjectId(post_id)})
             return {"message": "Post and comments deleted for post id:"+str(post_id)}
         else:
             raise ErrorHandler.NotFound("Post not found")
 
     @staticmethod
-    def HandleUserPostsRetrieval(email):
+    async def HandleUserPostsRetrieval(email):
         """
         Get all the posts of a specific user.
         """
         if Validate.verify_email(email):
-            post_count = post_collection.count_documents({"posted_by": email})
+            post_count = await post_collection.count_documents({"posted_by": email})
             if post_count == 0:
                 raise ErrorHandler.NotFound("No posts found for user")
             else:
                 posts_cursor = post_collection.find({"posted_by": email})
-                return posts_cursor
+                posts = await posts_cursor.to_list(length=None)
+                return posts
         else:
             raise ErrorHandler.NotFound("User not found")
 
     @staticmethod
-    def HandlePostUpdate(request: schemas.PostUpdate, post_id: str, images: Optional[List[UploadFile]]):
+    async def HandlePostUpdate(request: schemas.PostUpdate, post_id: str, images: Optional[List[UploadFile]]):
         """
         Update a post.
         """
         # Fetch the existing post
-        existing_post = post_collection.find_one({"_id": ObjectId(post_id)})
+        existing_post = await post_collection.find_one({"_id": ObjectId(post_id)})
 
         # Initialize images
         images_list = existing_post["images"] if not images else []
@@ -99,30 +100,30 @@ class PostsHandler:
         if images:
             for image in images:
                 img_id = image.filename.split(".")[0][:10]
-                img_byte = image.file.read()
+                img_byte = await image.read()
                 # Upload the image to the server
                 img_url = uploadImage(img_id, img_byte)
                 post_data["images"].append(img_url)
-        updated_post = post_collection.find_one_and_update(
+        updated_post = await post_collection.find_one_and_update(
             {"_id": ObjectId(post_id)}, {"$set": post_data}, return_document=ReturnDocument.AFTER)
         return updated_post
 
     @staticmethod
-    def HandlePostImageUpload(post_id, file):
+    async def HandlePostImageUpload(post_id, file):
         """
         Upload an image for a post.
         """
         try:
             if not file:
                 raise ErrorHandler.Error("No image found")
-            post = post_collection.find_one({"_id": ObjectId(post_id)})
+            post = await post_collection.find_one({"_id": ObjectId(post_id)})
             if post:
                 img_id = file.filename.split(".")[0][:10]
-                img_byte = file.file.read()
+                img_byte = await file.read()
                 # Upload the image to the server
                 img_url = uploadImage(img_id, img_byte)
                 # Put the image in the document of the post
-                post_collection.find_one_and_update(
+                await post_collection.find_one_and_update(
                     {"_id": ObjectId(post_id)},
                     {"$set": {"image": img_url}}
                 )
@@ -132,21 +133,21 @@ class PostsHandler:
             raise ErrorHandler.Error(str(e))
 
     @staticmethod
-    def HandlePostLike(post_id, email):
+    async def HandlePostLike(post_id, email):
         """
         Like a post.
         """
         # Check if the user req to like post exists or not
         if Validate.verify_email(email):
-            post = post_collection.find_one({"_id": ObjectId(post_id)})
+            post = await post_collection.find_one({"_id": ObjectId(post_id)})
             if post:
                 # If the user has liked the post already then remove the like from the post
                 if email in post["likes"]:
-                    post_collection.update_one({"_id": ObjectId(post_id)},
-                                               {"$pull": {"likes": email}})
+                    await post_collection.update_one({"_id": ObjectId(post_id)},
+                                                     {"$pull": {"likes": email}})
                     return {"message": "Post unliked"}
                 # use update_one if no return is needed and use find_one_and_update if return is needed
-                post_collection.update_one(
+                await post_collection.update_one(
                     {"_id": ObjectId(post_id)},
                     {"$addToSet": {"likes": email}}
                 )
@@ -155,25 +156,22 @@ class PostsHandler:
         return ErrorHandler.NotFound(f"User with email {email} not found in the database")
 
     @staticmethod
-    def HandleLikesCounts(post_id: str):
+    async def HandleLikesCounts(post_id: str):
         """
         Get the number of likes for a post.
         """
-        post = post_collection.find_one({"_id": ObjectId(post_id)})
+        post = await post_collection.find_one({"_id": ObjectId(post_id)})
         if post:
-            count_likes = 0
-            for like in post["likes"]:
-                count_likes += 1
+            count_likes = len(post["likes"])
             return {"likes": count_likes}
         return ErrorHandler.NotFound("Post not found")
 
     @staticmethod
-    def HandleFriendPostsRetrieval(user_email: str):
+    async def HandleFriendPostsRetrieval(user_email: str):
         """
         Get all the public posts.
         """
-        documents = list(post_collection.find({}))
-        print(type(documents))
+        documents = await post_collection.find({}).to_list(length=None)
         if documents:
             friends_posts = [document for document in documents if
                              (document["privacy"] == "friends" and user_email in document["friends"])]
@@ -183,16 +181,15 @@ class PostsHandler:
         return ErrorHandler.NotFound("No posts found")
 
     @staticmethod
-    def HandlePostPrivacyUpdate(post_id: str, privacy: str):
+    async def HandlePostPrivacyUpdate(post_id: str, privacy: str):
         """Change the privacy of your posts to public, friends or private."""
-        post = post_collection.find_one({"_id": ObjectId(post_id)})
+        post = await post_collection.find_one({"_id": ObjectId(post_id)})
         if post is not None:
             if privacy not in ["public", "friends", "private"]:
                 return ErrorHandler.Error("Invalid privacy type")
-            post_privacy = post_collection.find_one_and_update(
+            post_privacy = await post_collection.find_one_and_update(
                 {"_id": ObjectId(post_id)},
                 {"$set": {"privacy": privacy}}, return_document=ReturnDocument.AFTER)
             return {"message": "Post privacy updated to "+privacy}
-            # return post_privacy
         else:
             return ErrorHandler.NotFound("Post not found")
