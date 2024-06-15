@@ -11,7 +11,7 @@ router = APIRouter(prefix='/api/v1', tags=["Users"])
 @router.get("/user", response_model=List[schemas.UserDetails], status_code=status.HTTP_200_OK,)
 async def read_user():
 
-    user = UserManager.read()
+    user = await UserManager.read()
     return user
 
 
@@ -32,5 +32,5 @@ async def delete_user(request: Request, res: Response, depends=Depends(verify_to
 @router.post("/profile", status_code=status.HTTP_200_OK)
 async def upload_profile_pic(email: str, img: UploadFile = File(...)):
 
-    img_upload = UploadManager.HandleUploadProfilePic(email, img)
+    img_upload =await UploadManager.HandleUploadProfilePic(email, img)
     return img_upload

@@ -18,7 +18,7 @@ async def Signup_User(
 ):
 
     request = schemas.UserDetails(name=name, email=email, password=password)
-    user = UserManager.create(request, image)
+    user = await UserManager.create(request, image)
     return user
 
 
