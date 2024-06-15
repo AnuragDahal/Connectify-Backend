@@ -9,7 +9,7 @@ router = APIRouter(prefix="/api/v1/friends", tags=["Friends"])
 async def send_friend_request(friend_email: str, user_email: str):
     """Send a friend request to the user."""
 
-    response = FriendsHandler.HandleFriendRequest(friend_email, user_email)
+    response = await FriendsHandler.HandleFriendRequest(friend_email, user_email)
     return response
 
 
@@ -17,7 +17,7 @@ async def send_friend_request(friend_email: str, user_email: str):
 async def accept_friend_request(friend_email: str, user_email: str):
     """Accept the friend request from the user."""
 
-    response = FriendsHandler.HandleFriendAcceptance(friend_email, user_email)
+    response = await FriendsHandler.HandleFriendAcceptance(friend_email, user_email)
     return response
 
 
@@ -25,7 +25,7 @@ async def accept_friend_request(friend_email: str, user_email: str):
 async def show_friends(email: str):
     """Show all the friends of the user."""
 
-    response = FriendsHandler.HandleShowFriends(email)
+    response = await FriendsHandler.HandleShowFriends(email)
     return response
 
 
@@ -33,14 +33,14 @@ async def show_friends(email: str):
 async def show_friend_requests(email: str):
     """Show all the friend requests of the user."""
 
-    response = FriendsHandler.HandleShowFriendRequests(email)
+    response = await FriendsHandler.HandleShowFriendRequests(email)
     return response
 
 
 @router.delete("/requests/remove", status_code=status.HTTP_200_OK)
 async def remove_friend_requests(friend_email: str, user_email: str):
     """Remove the req from the friend_requests list"""
-    response = FriendsHandler.HandleRemoveFriendRequests(
+    response = await FriendsHandler.HandleRemoveFriendRequests(
         friend_email, user_email)
     return response
 
@@ -48,6 +48,6 @@ async def remove_friend_requests(friend_email: str, user_email: str):
 @router.delete("/remove", status_code=status.HTTP_200_OK)
 async def remove_friend(friend_email: str, user_email: str):
     """Remove the friend from the friends list"""
-    response = FriendsHandler.HandleRemoveFriend(friend_email, user_email)
+    response = await FriendsHandler.HandleRemoveFriend(friend_email, user_email)
     return response
 
