@@ -73,12 +73,12 @@ class EmailHandler:
         return False
 
     @staticmethod
-    def HandleEmailVerification(recipient: str):
+    async def HandleEmailVerification(recipient: str):
         try:
             otp = EmailHandler.generate_email_verification_otp()
             isEmailSent = EmailHandler.send_email_to(recipient, otp)
             # Add the otp to the database
-            otp_collection.insert_one(
+            await otp_collection.insert_one(
                 {"email": recipient, "otp": otp, "expires_on": datetime.now(timezone.utc)})
             if isEmailSent:
                 return "Email sent Successfully"
@@ -88,23 +88,23 @@ class EmailHandler:
             return str(e)
 
     @staticmethod
-    def HandleOtpVerification(user_otp: str, user_email: str):
+    async def HandleOtpVerification(user_otp: str, user_email: str):
         # Get the otp from the database of the specific user
-        email_doc = otp_collection.find_one({"email": user_email})
+        email_doc = await otp_collection.find_one({"email": user_email})
         if email_doc is not None:
             otp_in_db = email_doc["otp"]
             # Verify the otp
             isOtpVerified = EmailHandler.VerifyOtp(user_otp, otp_in_db)
             if isOtpVerified:
                 # Check if the user exists in the user_collection
-                isUser = user_collection.find_one({"email": user_email})
+                isUser = await user_collection.find_one({"email": user_email})
                 if not isUser:
                     return ErrorHandler.NotFound("User not found in the database")
                 # Update the user's email verification status
-                user_collection.update_one({"email": user_email},
-                                           {"$set": {"isEmailVerified": True}})
+                await user_collection.update_one({"email": user_email},
+                                                 {"$set": {"isEmailVerified": True}})
                 # After updating the user's email verification status, delete the otp from the database
-                otp_collection.find_one_and_delete({"email": user_email})
+                await otp_collection.find_one_and_delete({"email": user_email})
                 return "Email Verified Successfully"
             else:
                 return ErrorHandler.Unauthorized("Email Verification Failed, incorrect OTP")
