@@ -1,4 +1,4 @@
-from ....core.database import comments_collection, post_collection ,user_collection
+from ....core.database import comments_collection, post_collection, user_collection
 from ....models import schemas
 from pymongo import ReturnDocument
 from ...exception import ErrorHandler
@@ -8,22 +8,23 @@ from bson import ObjectId
 class CommentsHandler:
 
     @staticmethod
-    def HandleCommentCreation(request: schemas.Comments):
+    async def HandleCommentCreation(request: schemas.Comments):
         """
         Create a comment.
         """
-
-        if not post_collection.find_one({"_id": ObjectId(request.post_id)}):
+        post = await post_collection.find_one({"_id": ObjectId(request.post_id)})
+        if not post:
             return ErrorHandler.NotFound("Post not found")
-        new_comment = comments_collection.insert_one(
-            {**request.model_dump(exclude=None)})
-        # Add the comment_id to the post_id in the posts collection
+
+        new_comment = await comments_collection.insert_one({**request.model_dump(exclude=None)})
         comment_id = str(new_comment.inserted_id)
-        post_collection.find_one_and_update({
-            "_id": ObjectId(request.post_id)},
+
+        await post_collection.find_one_and_update(
+            {"_id": ObjectId(request.post_id)},
             {"$addToSet": {'comments': comment_id}}
         )
-        user_collection.find_one_and_update(
+
+        await user_collection.find_one_and_update(
             {"email": request.commented_by},
             {"$addToSet": {"commented": comment_id}}
         )
@@ -31,23 +32,23 @@ class CommentsHandler:
         return {"id": str(new_comment.inserted_id)}
 
     @staticmethod
-    def HandleCommentReadings():
+    async def HandleCommentReadings():
         """
         Get all the comments.
         """
-        comments_count = comments_collection.count_documents({})
+        comments_count = await comments_collection.count_documents({})
         if comments_count > 0:
-            comments = comments_collection.find()
+            comments_cursor = comments_collection.find()
+            comments = await comments_cursor.to_list(length=comments_count)
             return comments
         return ErrorHandler.NotFound("No comments found")
 
     @staticmethod
-    def HandleCommentUpdate(request: schemas.Comments, comment_id: str):
-        '''Update the existing comment'''
-        # Check if the post exists or not
-        is_post = post_collection.find_one({"_id": ObjectId(request.post_id)})
-        if is_post:
-            updated_comment = comments_collection.find_one_and_update(
+    async def HandleCommentUpdate(request: schemas.Comments, comment_id: str):
+        """Update the existing comment"""
+        post = await post_collection.find_one({"_id": ObjectId(request.post_id)})
+        if post:
+            updated_comment = await comments_collection.find_one_and_update(
                 {"_id": ObjectId(comment_id)},
                 {"$set": request.model_dump(exclude={"comment_id"})},
                 return_document=ReturnDocument.AFTER
@@ -58,19 +59,16 @@ class CommentsHandler:
         return ErrorHandler.NotFound("Post not found")
 
     @staticmethod
-    def HandleCommentDeletion(comment_id: str):
+    async def HandleCommentDeletion(comment_id: str):
         """
         Delete a comment.
         """
-        is_comment = comments_collection.find_one(
-            {"_id": ObjectId(comment_id)})
-        if is_comment:
-            # Remove the comment_id from the post_id in the posts collection
-            post_collection.find_one_and_delete(
-                {"comments": comment_id}
+        comment = await comments_collection.find_one({"_id": ObjectId(comment_id)})
+        if comment:
+            await post_collection.find_one_and_update(
+                {"comments": comment_id},
+                {"$pull": {"comments": comment_id}}
             )
-            # Delete the comment from the comments_collection
-            delete_comment = comments_collection.find_one_and_delete(
-                {"_id": ObjectId(comment_id)})
-            return {"message": "Comment deleted for comment id:"+str(comment_id)}
+            await comments_collection.find_one_and_delete({"_id": ObjectId(comment_id)})
+            return {"message": f"Comment deleted for comment id: {comment_id}"}
         return ErrorHandler.NotFound("Comment not found")
