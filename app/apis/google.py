@@ -45,14 +45,23 @@ async def auth(request: Request):
         profile_picture = claims.get('picture')
 
         # Check the user exists in the db or not
-        isUser = Validate.verify_email(user_email)
+        isUser = await Validate.verify_email(user_email)
         if not isUser:
-            user_collection.insert_one({
+            await user_collection.insert_one({
                 "name": username,
                 "email": user_email,
+                # here the password is set to google_oauth to differentiate the users
+                "password": "google_oauth",
                 "profile_picture": profile_picture,
                 "isEmailVerified": isEmailVerified,
+                "friends": [],
+                "friend_requests": [],
+                "posts": [],
+                "commented": [],
+                "comments_on_posts": [],
+                "likes": [],
             })
+
     except Exception as e:
         print(f"Token validation error: {e}")
         raise HTTPException(status_code=400, detail='Invalid token.')

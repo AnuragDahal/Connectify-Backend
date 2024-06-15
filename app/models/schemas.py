@@ -67,5 +67,6 @@ class UserDetails(BaseModel):
     comments_on_posts: Optional[List[str]] = []
 
 
+
 class UpdateUserEmail(BaseModel):
     email: str
