@@ -23,6 +23,10 @@ class CommentsHandler:
             {"_id": ObjectId(request.post_id)},
             {"$addToSet": {'comments': comment_id}}
         )
+        await user_collection.find_one_and_update(
+            {"email": request.commented_by},
+            {"$addToSet": {"comments_on_post": post["_id"]}}
+        )
 
         await user_collection.find_one_and_update(
             {"email": request.commented_by},
