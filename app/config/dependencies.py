@@ -1,18 +1,19 @@
-from fastapi import Depends, HTTPException, status, Response,Request
+from fastapi import Depends, HTTPException, status, Response, Request
 from typing import Annotated
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from ..utils.envutils import Environment
+from ..core.database import user_collection
+from ..utils.passhashutils import Encryptor
 
-env= Environment()
+env = Environment()
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/login")
 
 
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
 
     return verify_token
-
 
 
 async def verify_token(req: Request, res: Response):
@@ -28,8 +29,10 @@ async def verify_token(req: Request, res: Response):
 
         payload = jwt.decode(token, env.secret_key, algorithms=[env.algorithm])
         email: str = payload.get("sub")
-
-        if email is None:
+        password: str = payload.get("password")
+        # Check the password from the token
+        user = await user_collection.find_one({"email": email})
+        if not user["email"] and Encryptor.verify_password(password, user["password"]):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Could not validate credentials: 'sub' claim missing",

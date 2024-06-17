@@ -6,7 +6,9 @@ from datetime import timedelta
 from ...utils.envutils import Environment
 from ..exception import ErrorHandler
 from ...utils.jwtutil import create_access_token
+from ...utils.passhashutils import Encryptor
 from ..User.userhandler import Validate
+from ...core.database import user_collection
 
 env = Environment()
 SECRET_KEY = env.secret_key
@@ -18,13 +20,13 @@ TOKEN_KEY = env.TOKEN_KEY
 
 class AuthHandler:
     @staticmethod
-    def HandleUserLogin(request: OAuth2PasswordRequestForm = Depends()):
-        user_email = Validate.verify_email(request.username)
-        if user_email:
+    async def HandleUserLogin(request: OAuth2PasswordRequestForm = Depends()):
+        user_email = await user_collection.find_one({"email": request.username})
+        if user_email and Encryptor.verify_password(request.password, user_email["password"]):
             access_token_expires = timedelta(
                 minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
             access_token = create_access_token(
-                data={"sub": user_email}, expires_delta=access_token_expires)
+                data={"sub": user_email["email"]}, expires_delta=access_token_expires)
 
             response = JSONResponse(
                 content={"access_token": access_token,
@@ -38,9 +40,9 @@ class AuthHandler:
         return ErrorHandler.NotFound("User not found")
 
     @staticmethod
-    def HandleUserLogout(res: Response):
+    async def HandleUserLogout(res: Response):
         try:
-            res.delete_cookie(TOKEN_KEY)
+            await res.delete_cookie(TOKEN_KEY)
             return {"message": "Logged out"}
         except Exception as e:
             return ErrorHandler.NotFound(e)

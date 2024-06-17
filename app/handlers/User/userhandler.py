@@ -15,7 +15,7 @@ class Validate:
     async def verify_email(email: str):
         check_email = await user_collection.find_one({"email": email})
         if check_email:
-            return email
+            return True
         return False
 
 
