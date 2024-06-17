@@ -1,9 +1,11 @@
-from fastapi import APIRouter, status, Form
+from fastapi import APIRouter, status, Form, Depends
 from ..handlers.User.Posts.commentshandler import CommentsHandler
 from ..models import schemas
 from typing import List
+from ..config.dependencies import get_current_user
 
-router = APIRouter(prefix='/api/v1/posts/comments', tags=["Comments"])
+router = APIRouter(prefix='/api/v1/posts/comments', tags=["Comments"],
+                   dependencies=[Depends(get_current_user)])
 
 
 @router.post("/create", status_code=status.HTTP_200_OK)

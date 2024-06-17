@@ -1,8 +1,9 @@
-from fastapi import APIRouter, status
+from fastapi import APIRouter, status, Depends
 from ..handlers.User.Friends.friendhandler import FriendsHandler
+from ..config.dependencies import get_current_user
 
-
-router = APIRouter(prefix="/api/v1/friends", tags=["Friends"])
+router = APIRouter(prefix="/api/v1/friends", tags=["Friends"],
+                   dependencies=[Depends(get_current_user)])
 
 
 @router.post("/add", status_code=status.HTTP_200_OK)
@@ -50,4 +51,3 @@ async def remove_friend(friend_email: str, user_email: str):
     """Remove the friend from the friends list"""
     response = await FriendsHandler.HandleRemoveFriend(friend_email, user_email)
     return response
-

@@ -1,14 +1,15 @@
-from fastapi import APIRouter, status, UploadFile, File, Form
+from fastapi import APIRouter, status, UploadFile, File, Form, Depends
 from ..handlers.User.Posts.posthandler import PostsHandler
 from ..models import schemas
 from typing import List, Optional
+from ..config.dependencies import get_current_user
 
 
-router = APIRouter(prefix='/api/v1/posts', tags=["Posts"])
+router = APIRouter(prefix='/api/v1/posts', tags=["Posts"],
+                   dependencies=[Depends(get_current_user)])
+
 
 # Used Form data to accept the image file and other form data
-
-
 @router.post("/create", status_code=status.HTTP_200_OK)
 async def create_post(
     title: str = Form(...),
