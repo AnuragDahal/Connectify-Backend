@@ -15,7 +15,6 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
 
 
 
-
 async def verify_token(req: Request, res: Response):
     try:
         token = await req.cookies.get("token")

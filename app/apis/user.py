@@ -3,9 +3,10 @@ from ..handlers.User.userhandler import UserManager
 from ..handlers.User.uploadhandler import UploadManager
 from ..handlers.User.Posts.posthandler import PostsHandler
 from typing import List
-from ..config.dependencies import verify_token
+from ..config.dependencies import verify_token, get_current_user
 from ..models import schemas
-router = APIRouter(prefix='/api/v1', tags=["Users"])
+router = APIRouter(prefix='/api/v1', tags=["Users"],
+                   )
 
 
 @router.get("/user", response_model=List[schemas.UserDetails], status_code=status.HTTP_200_OK,)
@@ -15,22 +16,22 @@ async def read_user():
     return user
 
 
-@router.patch("/update/{old_email}", response_model=schemas.UserSignUp, status_code=status.HTTP_200_OK, dependencies=[Depends(verify_token)])
+@router.patch("/update/{old_email}", dependencies=[Depends(get_current_user), Depends(verify_token)], response_model=schemas.UserSignUp, status_code=status.HTTP_200_OK)
 async def update_user(old_email: str, request: Request, new_email: schemas.UpdateUserEmail):
 
     update_data = await UserManager.update(old_email, request, new_email)
     return update_data
 
 
-@router.delete("/delete", status_code=status.HTTP_200_OK,)
-async def delete_user(request: Request, res: Response, depends=Depends(verify_token)):
+@router.delete("/delete", dependencies=[Depends(get_current_user)], status_code=status.HTTP_200_OK,)
+async def delete_user(request: Request, res: Response, depends=Depends(get_current_user)):
 
     user = await UserManager.delete(request, res)
     return user
 
 
-@router.post("/profile", status_code=status.HTTP_200_OK)
+@router.post("/profile", dependencies=[Depends(get_current_user)], status_code=status.HTTP_200_OK)
 async def upload_profile_pic(email: str, img: UploadFile = File(...)):
 
-    img_upload =await UploadManager.HandleUploadProfilePic(email, img)
+    img_upload = await UploadManager.HandleUploadProfilePic(email, img)
     return img_upload
