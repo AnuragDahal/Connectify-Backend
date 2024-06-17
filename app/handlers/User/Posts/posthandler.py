@@ -11,6 +11,7 @@ from bson import ObjectId
 from datetime import datetime, timezone
 
 
+
 def gen_random_id():
     return str(uuid.uuid4())
 
@@ -21,7 +22,8 @@ class PostsHandler:
         """
         Create a new post.
         """
-        post_data = {**request.model_dump(exclude=None), "privacy": "public"}
+        post_data = {
+            **request.model_dump(exclude=None)}
         if images:
             for image in images:
                 img_id = image.filename.split(".")[0][:10]
