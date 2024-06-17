@@ -24,13 +24,13 @@ async def signup_user(
 
 @router.post("/login", status_code=status.HTTP_200_OK)
 async def login(request: OAuth2PasswordRequestForm = Depends()):
-    user_in = AuthHandler.login(request)
+    user_in = await AuthHandler.HandleUserLogin(request)
     return user_in
 
 
 @router.post("/logout", dependencies=[Depends(get_current_user)])
 async def logout(res: Response):
-    user_out = AuthHandler.logout(res)
+    user_out = await AuthHandler.HandleUserLogout(res)
     return user_out
 
 

@@ -18,7 +18,7 @@ TOKEN_KEY = env.TOKEN_KEY
 
 class AuthHandler:
     @staticmethod
-    def login(request: OAuth2PasswordRequestForm = Depends()):
+    def HandleUserLogin(request: OAuth2PasswordRequestForm = Depends()):
         user_email = Validate.verify_email(request.username)
         if user_email:
             access_token_expires = timedelta(
@@ -38,10 +38,9 @@ class AuthHandler:
         return ErrorHandler.NotFound("User not found")
 
     @staticmethod
-    def logout(res: Response):
+    def HandleUserLogout(res: Response):
         try:
             res.delete_cookie(TOKEN_KEY)
             return {"message": "Logged out"}
         except Exception as e:
             return ErrorHandler.NotFound(e)
-
