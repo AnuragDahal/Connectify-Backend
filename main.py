@@ -11,10 +11,10 @@ env = Environment()
 
 app = FastAPI(title="CONNECTIFY", version="0.1.0")
 # Rate limiting middleware
-limiter = Limiter(key_func=get_remote_address,
-                  default_limits=["1000/hour", "50/minute"])
-app.state.limiter = limiter
-app.add_exception_handler(HTTPException, _rate_limit_exceeded_handler)
+# limiter = Limiter(key_func=get_remote_address,
+#                   default_limits=["1000/hour", "50/minute"])
+# app.state.limiter = limiter
+# app.add_exception_handler(HTTPException, _rate_limit_exceeded_handler)
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,

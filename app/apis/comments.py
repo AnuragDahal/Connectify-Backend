@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status, Form, Depends
+from fastapi import APIRouter, status, Form, Depends, Query, Path
 from ..handlers.User.Posts.commentshandler import CommentsHandler
 from ..models import schemas
 from typing import List
@@ -20,15 +20,16 @@ async def create_comment(
     return new_comment
 
 
-@router.get("/read", response_model=List[schemas.Comments], status_code=status.HTTP_200_OK)
-async def get_comments():
-    comments = await CommentsHandler.HandleCommentReadings()
+@router.get("/read/{post_id}", response_model=List[schemas.Comments], status_code=status.HTTP_200_OK)
+async def get_comments(post_id: str = Path(..., description="The post id of the post whose comments you want to read")):
+    comments = await CommentsHandler.HandleCommentReadings(post_id)
     return comments
 
 
 @router.patch("/update", response_model=schemas.Comments, status_code=status.HTTP_200_OK)
 async def update_comment(
-    comment_id: str,
+    comment_id: str = Query(...,
+                            description="The comment id of the comment you want to update"),
     post_id: str = Form(...),
     commented_by: str = Form(...),
     content: str = Form(...)
@@ -39,7 +40,7 @@ async def update_comment(
     return updated_comment
 
 
-@router.delete("/delete", status_code=status.HTTP_200_OK)
-async def delete_comment(comment_id: str):
+@router.delete("/delete/{comment_id}", status_code=status.HTTP_200_OK)
+async def delete_comment(comment_id: str = Path(..., description="The comment id of the comment you want to delete")):
     comment = await CommentsHandler.HandleCommentDeletion(comment_id)
     return comment

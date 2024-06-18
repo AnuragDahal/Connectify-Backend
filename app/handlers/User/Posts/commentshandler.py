@@ -36,16 +36,17 @@ class CommentsHandler:
         return {"id": str(new_comment.inserted_id)}
 
     @staticmethod
-    async def HandleCommentReadings():
+    async def HandleCommentReadings(post_id: str):
         """
-        Get all the comments.
+        Get all the comments associated with the post .
         """
-        comments_count = await comments_collection.count_documents({})
-        if comments_count > 0:
-            comments_cursor = comments_collection.find()
-            comments = await comments_cursor.to_list(length=comments_count)
-            return comments
-        return ErrorHandler.NotFound("No comments found")
+        post = await post_collection.find_one({"_id": ObjectId(post_id)})
+        if post:
+            comments = await comments_collection.find({"post_id": post_id}).to_list(length=100)
+            if comments:
+                return comments
+            return ErrorHandler.NotFound("No comments found")
+        return ErrorHandler.NotFound("No post found with the given post id")
 
     @staticmethod
     async def HandleCommentUpdate(request: schemas.Comments, comment_id: str):
