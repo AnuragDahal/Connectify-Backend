@@ -1,14 +1,20 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from app.apis import user, auth, google, posts, comments, friends
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.database import client, db
 from starlette.middleware.sessions import SessionMiddleware
 from app.utils.envutils import Environment
-
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
 
 env = Environment()
 
 app = FastAPI(title="CONNECTIFY", version="0.1.0")
+# Rate limiting middleware
+limiter = Limiter(key_func=get_remote_address,
+                  default_limits=["1000/hour", "50/minute"])
+app.state.limiter = limiter
+app.add_exception_handler(HTTPException, _rate_limit_exceeded_handler)
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
