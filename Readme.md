@@ -1,6 +1,6 @@
 # Connectify API Documentation
 
-This document provides an overview of the API endpoints for our application, detailing the routes and their respective functions. [Click here to view the swagger docs](https://connnectify.herokuapp.com/docs)
+This document provides an overview of the API endpoints for our application, detailing the routes and their respective functions.<br> [Click here to view the swagger docs](https://connectify-backend-t3b4.onrender.com)
 
 ## Authentication Routes
 
