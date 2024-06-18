@@ -32,6 +32,11 @@ except Exception as e:
     print(e)
 
 
+@app.get('/')
+def root():
+    return {"message": "Welcome to Connectify API, navigate to /docs for documentation."}
+
+
 @app.get('/home')
 def home():
     return {"message": "You have been logged in through Google OAuth."}
