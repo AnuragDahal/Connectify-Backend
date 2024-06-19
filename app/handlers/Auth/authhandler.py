@@ -1,4 +1,4 @@
-from fastapi import Depends, Response , Request
+from fastapi import Depends, Response, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import JSONResponse
 from jose import jwt
@@ -11,9 +11,9 @@ from ..User.userhandler import Validate
 from ...core.database import user_collection
 
 env = Environment()
-SECRET_KEY = env.secret_key
-ALGORITHM = env.algorithm
-ACCESS_TOKEN_EXPIRE_MINUTES = env.access_token_expire_minutes
+SECRET_KEY = env.SECRET_KEY
+ALGORITHM = env.ALGORITHM
+ACCESS_TOKEN_EXPIRE_MINUTES = env.ACCESS_TOKEN_EXPIRE_MINUTES
 TOKEN_TYPE = env.TOKEN_TYPE
 TOKEN_KEY = env.TOKEN_KEY
 
@@ -40,10 +40,9 @@ class AuthHandler:
         return ErrorHandler.NotFound("User not found")
 
     @staticmethod
-    async def HandleUserLogout(res:Response):
+    async def HandleUserLogout(res: Response):
         try:
-            # Delete the access token from the client side
             res.delete_cookie(key=TOKEN_KEY)
-            return JSONResponse({"message": "Logged out"})
+            return {"message": "Logged out successfully"}
         except Exception as e:
-            return ErrorHandler.NotFound(e)
+            return ErrorHandler.Error(str(e))

@@ -4,11 +4,6 @@ from jose import jwt
 import os
 
 env = Environment()
-secret_key = env.secret_key
-ALGORITHM = env.algorithm
-ACCESS_TOKEN_EXPIRE_MINUTES = env.access_token_expire_minutes
-TOKEN_TYPE = env.TOKEN_TYPE
-TOKEN_KEY = env.TOKEN_KEY
 
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
@@ -18,5 +13,6 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     else:
         expire = datetime.now(timezone.utc) + timedelta(minutes=15)
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, secret_key, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, env.SECRET_KEY,
+                             algorithm=env.ALGORITHM)
     return encoded_jwt

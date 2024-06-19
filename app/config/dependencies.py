@@ -27,7 +27,7 @@ async def verify_token(req: Request, res: Response):
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
-        payload = jwt.decode(token, env.secret_key, algorithms=[env.algorithm])
+        payload = jwt.decode(token, env.SECRET_KEY, algorithms=[env.algorithm])
         email: str = payload.get("sub")
         password: str = payload.get("password")
         # Check the password from the token
