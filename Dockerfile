@@ -1,4 +1,6 @@
+#Use the official image as a parent image
 FROM python:latest
+
 # Set the working directory
 WORKDIR /app
 
