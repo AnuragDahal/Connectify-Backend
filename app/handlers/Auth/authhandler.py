@@ -1,4 +1,4 @@
-from fastapi import Depends, Response
+from fastapi import Depends, Response , Request
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import JSONResponse
 from jose import jwt
@@ -40,9 +40,10 @@ class AuthHandler:
         return ErrorHandler.NotFound("User not found")
 
     @staticmethod
-    async def HandleUserLogout(res: Response):
+    async def HandleUserLogout(res:Response):
         try:
-            await res.delete_cookie(TOKEN_KEY)
-            return {"message": "Logged out"}
+            # Delete the access token from the client side
+            res.delete_cookie(key=TOKEN_KEY)
+            return JSONResponse({"message": "Logged out"})
         except Exception as e:
             return ErrorHandler.NotFound(e)

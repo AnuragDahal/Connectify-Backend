@@ -6,7 +6,7 @@ from ..handlers.User.userhandler import UserManager
 from ..models import schemas
 from ..handlers.Auth.emailHandler import EmailHandler
 from ..config.dependencies import get_current_user
-
+from ..utils.authutils import validate_headers
 router = APIRouter(prefix='/api/v1', tags=["Auth"])
 
 
@@ -29,7 +29,8 @@ async def login(request: OAuth2PasswordRequestForm = Depends()):
 
 
 @router.post("/logout", dependencies=[Depends(get_current_user)])
-async def logout(res: Response):
+@validate_headers
+async def logout(p, res: Response):
     user_out = await AuthHandler.HandleUserLogout(res)
     return user_out
 
@@ -43,7 +44,8 @@ async def email_verification(email: Annotated[str, Query(..., description="Email
 @router.post("/otp", status_code=status.HTTP_200_OK)
 async def otp_verification(
     otp: Annotated[str, Query(..., description="OTP to verify")],
-    email: Annotated[str, Query(..., description="Email for OTP verification")]
+    email: Annotated[str,
+                     Query(..., description="Email for OTP verification")]
 ):
     is_verified = await EmailHandler.HandleOtpVerification(otp, email)
     return is_verified

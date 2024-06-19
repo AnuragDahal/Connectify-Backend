@@ -1,8 +1,10 @@
 import smtplib
+from fastapi import Request
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from ...utils.envutils import Environment
 import random
+from jose import jwt, JWTError
 from ...core.database import otp_collection, user_collection
 from ...handlers.exception import ErrorHandler
 from datetime import datetime, timezone
@@ -75,6 +77,7 @@ class EmailHandler:
     @staticmethod
     async def HandleEmailVerification(recipient: str):
         try:
+            # Check the email with the email in headers
             otp = EmailHandler.generate_email_verification_otp()
             isEmailSent = EmailHandler.send_email_to(recipient, otp)
             # Add the otp to the database
