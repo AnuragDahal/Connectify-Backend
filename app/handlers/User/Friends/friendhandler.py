@@ -44,10 +44,10 @@ class FriendsHandler:
         return ErrorHandler.NotFound("User or friend not found")
 
     @staticmethod
-    async def HandleShowFriends(user_email: str):
+    async def HandleShowFriends(user_logged_in: str):
         """Show all the friends of the user.
         """
-        user_doc = await user_collection.find_one({"email": user_email})
+        user_doc = await user_collection.find_one({"email": user_logged_in})
         if user_doc:
             if user_doc['friends']:
                 return user_doc['friends']

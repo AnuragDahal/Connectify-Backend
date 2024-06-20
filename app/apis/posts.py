@@ -3,6 +3,7 @@ from typing import List, Optional
 from ..handlers.User.Posts.posthandler import PostsHandler
 from ..models import schemas
 from ..config.dependencies import get_current_user
+from ..utils.authutils import get_email_from_token
 
 router = APIRouter(prefix='/api/v1/posts',
                    tags=["Posts"], dependencies=[Depends(get_current_user)])
@@ -74,16 +75,20 @@ async def get_likes_count(post_id: str = Query(...)):
     return likes_count
 
 
-@router.get("/friends", status_code=status.HTTP_200_OK)
-async def get_friends_posts(user_email: str = Query(...)):
-    posts = await PostsHandler.HandleFriendPostsRetrieval(user_email)
+@router.get("/friend/show", response_model=List[schemas.Post], status_code=status.HTTP_200_OK)
+async def get_post_of_friend(friend_email: str = Query(...), user_logged_in: str = Depends(get_email_from_token)):
+    print(user_logged_in)
+    posts = await PostsHandler.HandleFriendPostsRetrieval(
+        friend_email, user_logged_in)
     return posts
 
 
 @router.put("/privacy", status_code=status.HTTP_200_OK)
 async def update_post_privacy(
+
     post_id: str = Query(...),
-    privacy: str = Query(...)
+    privacy: str = Query(...),
+    email: str = Depends(get_email_from_token)
 ):
-    post = await PostsHandler.HandlePostPrivacyUpdate(post_id, privacy)
+    post = await PostsHandler.HandlePostPrivacyUpdate(post_id, privacy, email)
     return post

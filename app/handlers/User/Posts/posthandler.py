@@ -11,17 +11,18 @@ from bson import ObjectId
 from datetime import datetime, timezone
 
 
-
 def gen_random_id():
     return str(uuid.uuid4())
 
 
 class PostsHandler:
     @staticmethod
-    async def HandlePostCreation(request: schemas.Post, images: Optional[List[UploadFile]]):
+    async def HandlePostCreation(request: schemas.Post, user_logged_in: str, images: Optional[List[UploadFile]]):
         """
         Create a new post.
         """
+        if request.posted_by != user_logged_in:
+            return ErrorHandler.Unauthorized("You are not authorized to create a post for another user")
         post_data = {
             **request.model_dump(exclude=None)}
         if images:
@@ -52,10 +53,13 @@ class PostsHandler:
         return ErrorHandler.NotFound("No posts found")
 
     @staticmethod
-    async def HandlePostDeletion(post_id):
+    async def HandlePostDeletion(post_id, user_logged_in: str):
         """
         Delete a post.
         """
+        user = await user_collection.find_one({"email": user_logged_in})
+        if post_id not in user["posts"]:
+            return ErrorHandler.Unauthorized("You are not authorized to delete this post")
         post = await post_collection.find_one({"_id": ObjectId(post_id)})
         if post:
             # Delete all the comments for the post and then delete the post
@@ -70,7 +74,7 @@ class PostsHandler:
         """
         Get all the posts of a specific user.
         """
-        if Validate.verify_email(email):
+        if await Validate.verify_email(email):
             post_count = await post_collection.count_documents({"posted_by": email})
             if post_count == 0:
                 raise ErrorHandler.NotFound("No posts found for user")
@@ -82,10 +86,14 @@ class PostsHandler:
             raise ErrorHandler.NotFound("User not found")
 
     @staticmethod
-    async def HandlePostUpdate(request: schemas.PostUpdate, post_id: str, images: Optional[List[UploadFile]]):
+    async def HandlePostUpdate(request: schemas.PostUpdate, user_logged_in: str, post_id: str, images: Optional[List[UploadFile]]):
         """
         Update a post.
         """
+        # Check if the user is authorized to update the post
+        user = await user_collection.find_one({"email": user_logged_in})
+        if post_id not in user["posts"]:
+            return ErrorHandler.Unauthorized("You are not authorized to update this post")
         # Fetch the existing post
         existing_post = await post_collection.find_one({"_id": ObjectId(post_id)})
 
@@ -111,11 +119,14 @@ class PostsHandler:
         return updated_post
 
     @staticmethod
-    async def HandlePostImageUpload(post_id, file):
+    async def HandlePostImageUpload(post_id: str, user_logged_in: str, file):
         """
         Upload an image for a post.
         """
         try:
+            user = await user_collection.find_one({"email": user_logged_in})
+            if post_id not in user["posts"]:
+                return ErrorHandler.Unauthorized("You are not authorized to upload image to this post")
             if not file:
                 raise ErrorHandler.Error("No image found")
             post = await post_collection.find_one({"_id": ObjectId(post_id)})
@@ -169,22 +180,33 @@ class PostsHandler:
         return ErrorHandler.NotFound("Post not found")
 
     @staticmethod
-    async def HandleFriendPostsRetrieval(user_email: str):
+    async def HandleFriendPostsRetrieval(friend_email: str, user_logged_in: str):
         """
-        Get all the public posts.
+        Get all the public posts and friend_posts.
         """
-        documents = await post_collection.find({}).to_list(length=None)
-        if documents:
-            friends_posts = [document for document in documents if
-                             (document["privacy"] == "friends" and user_email in document["friends"])]
-            if friends_posts:
-                return friends_posts
-            return ErrorHandler.NotFound("No posts found for friends")
-        return ErrorHandler.NotFound("No posts found")
+        user = await user_collection.find_one({"email": user_logged_in})
+        if not user:
+            return ErrorHandler.NotFound("No user found")
+        if friend_email in user["friends"]:
+            post_count = await post_collection.count_documents({"posted_by": friend_email})
+            if post_count == 0:
+                raise ErrorHandler.NotFound("No posts found for user")
+            else:
+                posts_cursor = post_collection.find(
+                    {"posted_by": friend_email})
+                posts = await posts_cursor.to_list(length=None)
+                available_post = [
+                    post for post in posts if post["privacy"] != "private"]
+                return available_post
+        else:
+            return ErrorHandler.NotFound("No friends found ")
 
     @staticmethod
-    async def HandlePostPrivacyUpdate(post_id: str, privacy: str):
+    async def HandlePostPrivacyUpdate(post_id: str, privacy: str, user_logged_in: str):
         """Change the privacy of your posts to public, friends or private."""
+        user = await user_collection.find_one({"email": user_logged_in})
+        if post_id not in user["posts"]:
+            return ErrorHandler.Unauthorized("You are not authorized to update this post")
         post = await post_collection.find_one({"_id": ObjectId(post_id)})
         if post is not None:
             if privacy not in ["public", "friends", "private"]:

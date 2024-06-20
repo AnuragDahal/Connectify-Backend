@@ -2,6 +2,7 @@ from fastapi import APIRouter, status, Query, Form, Depends
 from typing import Annotated
 from ..handlers.User.Friends.friendhandler import FriendsHandler
 from ..config.dependencies import get_current_user
+from ..utils.authutils import get_email_from_token
 
 router = APIRouter(prefix="/api/v1/friends", tags=["Friends"], dependencies=[Depends(get_current_user)])
 
@@ -25,7 +26,7 @@ async def accept_friend_request(
 
 
 @router.get("/", status_code=status.HTTP_200_OK)
-async def show_friends(email: Annotated[str, Query(..., description="Email of the user")]):
+async def show_friends(email: str = Depends(get_email_from_token)):
     response = await FriendsHandler.HandleShowFriends(email)
     return response
 
