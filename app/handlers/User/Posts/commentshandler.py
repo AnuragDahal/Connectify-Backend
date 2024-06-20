@@ -75,7 +75,6 @@ class CommentsHandler:
         # check if the user deleting the comment owns the post or not
         comment = await comments_collection.find_one({"_id": ObjectId(comment_id)})
         user = await user_collection.find_one({"email": email_from_header})
-        print(comment)
         if comment:
             if comment["post_id"] in user["posts"]:
                 await post_collection.find_one_and_update(
