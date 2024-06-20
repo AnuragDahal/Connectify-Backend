@@ -52,7 +52,9 @@ async def delete_post_comments(
     return comment
 
 
-# @router.delete("/deleteown/{comment_id}", status_code=status.HTTP_200_OK)
-# async def delete_own_comments(comment_id: str = Path(..., description="The comment id of the comment you want to delete")):
-#     comment = await CommentsHandler.HandleCommentDeletion(comment_id)
-#     return comment
+@router.delete("/deleteown/{comment_id}", status_code=status.HTTP_200_OK)
+async def delete_own_comments(comment_id: str =
+                              Path(..., description="The comment id of the comment you want to delete"),
+                              email: str = Depends(get_email_from_token)):
+    comment = await CommentsHandler.HandleOwnCommentDeletion(comment_id, email)
+    return comment

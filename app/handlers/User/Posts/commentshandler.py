@@ -100,3 +100,31 @@ class CommentsHandler:
                 return ErrorHandler.Unauthorized("You are not authorized to delete this comment")
         else:
             return ErrorHandler.NotFound("Comment not found")
+
+    @staticmethod
+    async def HandleOwnCommentDeletion(comment_id: id, user_logged_in: str):
+        # Check if the user deleting the comment is the owner of the comment
+        comment = await comments_collection.find_one({"_id": ObjectId(comment_id)})
+        if comment:
+            if comment["commented_by"] == user_logged_in:
+                # Remove the comment from the comments collection
+                await comments_collection.find_one_and_delete({"_id": ObjectId(comment_id)})
+                # Also remove the comment from the user's commented list
+                await user_collection.find_one_and_update(
+                    {"email": user_logged_in},
+                    {"$pull": {"commented": comment_id}})
+                # Also remove the comment from the post comments list
+                await post_collection.find_one_and_update(
+                    {"_id": comment["post_id"]},
+                    {"$pull": {"comments": comment_id}}
+                )
+                # Check for the count of the comments in the post and remove the post from the user's comments_on_posts list if the comment count reaches 0
+                count_documents = await comments_collection.count_documents({"post_id": comment["post_id"]})
+                if count_documents == 0:
+                    await user_collection.find_one_and_update(
+                        {"email": user_logged_in},
+                        {"$pull": {"comments_on_posts": comment["post_id"]}}
+                    )
+                return {"message": f"Comment deleted for comment id: {comment_id}"}
+            return ErrorHandler.Unauthorized("You are not authorized to delete this comment")
+        return ErrorHandler.NotFound("Comment not found")
