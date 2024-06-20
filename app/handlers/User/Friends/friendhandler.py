@@ -83,9 +83,9 @@ class FriendsHandler:
     async def HandleRemoveFriend(friend_email: str, user_email: str):
         """Remove the friend from the friends list
         """
-        is_user = await Validate.verify_email(user_email)
+        # Since the user email is retrieved from the user logged in so no need to check if the user exists
         is_friend = await Validate.verify_email(friend_email)
-        if is_user and is_friend:
+        if is_friend:
             remove_friend = await user_collection.update_one(
                 {"email": user_email}, {"$pull": {"friends": friend_email}})
             if remove_friend.modified_count == 0:
