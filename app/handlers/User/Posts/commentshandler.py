@@ -8,10 +8,13 @@ from bson import ObjectId
 class CommentsHandler:
 
     @staticmethod
-    async def HandleCommentCreation(request: schemas.Comments):
+    async def HandleCommentCreation(request: schemas.Comments, email):
         """
         Create a comment.
         """
+        # Check the use creating the comment is the logged in user or not
+        if request.commented_by != email:
+            return ErrorHandler.Unauthorized("You are not authorized to comment on this post")
         post = await post_collection.find_one({"_id": ObjectId(request.post_id)})
         if not post:
             return ErrorHandler.NotFound("Post not found")
@@ -25,14 +28,12 @@ class CommentsHandler:
         )
         await user_collection.find_one_and_update(
             {"email": request.commented_by},
-            {"$addToSet": {"comments_on_post": post["_id"]}}
+            {"$addToSet": {"comments_on_posts": request.post_id}}
         )
-
         await user_collection.find_one_and_update(
             {"email": request.commented_by},
             {"$addToSet": {"commented": comment_id}}
         )
-
         return {"id": str(new_comment.inserted_id)}
 
     @staticmethod
@@ -49,8 +50,11 @@ class CommentsHandler:
         return ErrorHandler.NotFound("No post found with the given post id")
 
     @staticmethod
-    async def HandleCommentUpdate(request: schemas.Comments, comment_id: str):
+    async def HandleCommentUpdate(request: schemas.Comments, comment_id: str, email_from_header: str):
         """Update the existing comment"""
+        # Check the user updating the comment is the logged in user or not
+        if request.commented_by != email_from_header:
+            return ErrorHandler.Unauthorized("You are not authorized to update this comment")
         post = await post_collection.find_one({"_id": ObjectId(request.post_id)})
         if post:
             updated_comment = await comments_collection.find_one_and_update(
@@ -64,16 +68,36 @@ class CommentsHandler:
         return ErrorHandler.NotFound("Post not found")
 
     @staticmethod
-    async def HandleCommentDeletion(comment_id: str):
+    async def HandlePostCommentDeletion(comment_id: str, email_from_header: str):
         """
         Delete a comment.
         """
+        # check if the user deleting the comment owns the post or not
         comment = await comments_collection.find_one({"_id": ObjectId(comment_id)})
+        user = await user_collection.find_one({"email": email_from_header})
+        print(comment)
         if comment:
-            await post_collection.find_one_and_update(
-                {"comments": comment_id},
-                {"$pull": {"comments": comment_id}}
-            )
-            await comments_collection.find_one_and_delete({"_id": ObjectId(comment_id)})
-            return {"message": f"Comment deleted for comment id: {comment_id}"}
-        return ErrorHandler.NotFound("Comment not found")
+            if comment["post_id"] in user["posts"]:
+                await post_collection.find_one_and_update(
+                    {"comments": comment_id},
+                    {"$pull": {"comments": comment_id}}
+                )
+
+                await comments_collection.find_one_and_delete({"_id": ObjectId(comment_id)})
+                # Also remove the comment from the user's commented list
+                await user_collection.find_one_and_update(
+                    {"email": comment["commented_by"]},
+                    {"$pull": {"commented": comment_id}})
+                # Check for the count of the comments in the post and remove the post from the user's comments_on_posts list if the comment count reaches 0
+
+                count_documents = await comments_collection.count_documents({"post_id": comment["post_id"]})
+                if count_documents == 0:
+                    await user_collection.find_one_and_update(
+                        {"email": comment["commented_by"]},
+                        {"$pull": {"comments_on_posts": comment["post_id"]}}
+                    )
+                return {"message": f"Comment deleted for comment id: {comment_id}"}
+            else:
+                return ErrorHandler.Unauthorized("You are not authorized to delete this comment")
+        else:
+            return ErrorHandler.NotFound("Comment not found")

@@ -3,6 +3,7 @@ from ..handlers.User.Posts.commentshandler import CommentsHandler
 from ..models import schemas
 from typing import List
 from ..config.dependencies import get_current_user
+from ..utils.authutils import get_email_from_token
 
 router = APIRouter(prefix='/api/v1/posts/comments', tags=["Comments"],
                    dependencies=[Depends(get_current_user)])
@@ -12,11 +13,12 @@ router = APIRouter(prefix='/api/v1/posts/comments', tags=["Comments"],
 async def create_comment(
     post_id: str = Form(...),
     content: str = Form(...),
-    commented_by: str = Form(...)
+    commented_by: str = Form(...),
+    email: str = Depends(get_email_from_token)
 ):
     request = schemas.Comments(
         post_id=post_id, commented_by=commented_by, comment=content)
-    new_comment = await CommentsHandler.HandleCommentCreation(request)
+    new_comment = await CommentsHandler.HandleCommentCreation(request, email)
     return new_comment
 
 
@@ -32,15 +34,25 @@ async def update_comment(
                             description="The comment id of the comment you want to update"),
     post_id: str = Form(...),
     commented_by: str = Form(...),
-    content: str = Form(...)
+    content: str = Form(...),
+    email: str = Depends(get_email_from_token)
 ):
     request = schemas.Comments(
         post_id=post_id, commented_by=commented_by, comment=content)
-    updated_comment = await CommentsHandler.HandleCommentUpdate(request, comment_id)
+    updated_comment = await CommentsHandler.HandleCommentUpdate(request, comment_id, email)
     return updated_comment
 
 
 @router.delete("/delete/{comment_id}", status_code=status.HTTP_200_OK)
-async def delete_comment(comment_id: str = Path(..., description="The comment id of the comment you want to delete")):
-    comment = await CommentsHandler.HandleCommentDeletion(comment_id)
+async def delete_post_comments(
+        comment_id: str =
+        Path(..., description="The comment id of the comment you want to delete"),
+        email: str = Depends(get_email_from_token)):
+    comment = await CommentsHandler.HandlePostCommentDeletion(comment_id, email)
     return comment
+
+
+# @router.delete("/deleteown/{comment_id}", status_code=status.HTTP_200_OK)
+# async def delete_own_comments(comment_id: str = Path(..., description="The comment id of the comment you want to delete")):
+#     comment = await CommentsHandler.HandleCommentDeletion(comment_id)
+#     return comment
