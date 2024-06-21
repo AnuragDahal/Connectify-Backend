@@ -4,7 +4,7 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from ..utils.envutils import Environment
 from ..core.database import user_collection
-from ..utils.passhashutils import Encryptor
+from ..utils.passhashutils import Encrypt
 
 env = Environment()
 
@@ -32,7 +32,7 @@ async def verify_token(req: Request, res: Response):
         password: str = payload.get("password")
         # Check the password from the token
         user = await user_collection.find_one({"email": email})
-        if not user["email"] and Encryptor.verify_password(password, user["password"]):
+        if not user["email"] and Encrypt.verify_password(password, user["password"]):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Could not validate credentials: 'sub' claim missing",

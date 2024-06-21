@@ -1,13 +1,13 @@
 from ...models import schemas
-from fastapi import Request, Response, UploadFile
+from fastapi import Response, UploadFile
 from ...core.database import user_collection
 from ..exception import ErrorHandler
 from pymongo import ReturnDocument
-from ...config.dependencies import verify_token
 from ...config.cloudinary_config import uploadImage
-from ...utils.passhashutils import Encryptor
+from ...utils.passhashutils import Encrypt
 from typing import Optional
 from ...core.database import post_collection, comments_collection
+from ...utils.passhashutils import Encrypt
 
 
 class Validate:
@@ -28,7 +28,7 @@ class UserManager:
         """
         duplicate_user = await Validate.verify_email(request.email)
         if not duplicate_user:
-            hashed_password = Encryptor.hash_password(request.password)
+            hashed_password = Encrypt.hash_password(request.password)
             # Add the image to the server and set the url in the db
             user_data = {
                 **request.model_dump(exclude={"password"}), "password": hashed_password, "isEmailVerified": False}
@@ -59,41 +59,44 @@ class UserManager:
             raise ErrorHandler.NotFound("No user found")
 
     @staticmethod
-    async def update(old_email: str, request: Request, new_email: schemas.UpdateUserEmail):
-        """"""
-        # Get the user email from the cookie
-        logged_in_user_email = await verify_token(request)
+    async def update(old_email: str, new_email: str, password: str):
+        """Update your email address."""
+
         # Check email from the cookie and the email to be updated are same
-        if old_email != logged_in_user_email:
-            raise ErrorHandler.Forbidden(
-                "You are not authorized to perform this action")
-            # check if the new email entered is available or not
+        if old_email == new_email:
+            return ErrorHandler.Bad(
+                "Please Enter the new email")
+
+        # Check the password of the user
+        user_details = await user_collection.find_one({"email": old_email})
+        if not Encrypt.verify_password(password, user_details["password"]):
+            return ErrorHandler.Unauthorized("Password is incorrect")
+
+        # check if the new email entered is available or not
         is_available = await Validate.verify_email(new_email.email)
         if not is_available:
             user = await user_collection.find_one_and_update(
-                {"email": logged_in_user_email},
-                {"$set": {"email": new_email.email}},
-                return_document=ReturnDocument.AFTER
-            )
+                {"email": old_email},
+                {"$set": {"email": new_email.email, "isEmailVerified": False}},
+                return_document=ReturnDocument.AFTER)
+
             if user is None:
                 raise ErrorHandler.NotFound("User not found")
             return user
         else:
-            return ErrorHandler.Error("Bad request")
+            return ErrorHandler.ALreadyExists("The User with the given email already exists")
 
     @staticmethod
-    async def delete(request: Request, res: Response):
+    async def delete(user_email: str, res: Response):
         """
         Delete a user
         """
-        # Get the user email from the cookie
-        user_email = await verify_token(request)
         # Delete the user through the email
         deleted_user = await user_collection.delete_one({"email": user_email})
+        if deleted_user.deleted_count == 0:
+            return ErrorHandler.NotFound("User not found")
         # Delete all the data sets associated with the user such as posts, comments, etc.
         await comments_collection.delete_many({"commented_by": user_email})
         await post_collection.delete_many({"posted_by": user_email})
         res.delete_cookie('token')
-        if deleted_user.deleted_count == 0:
-            raise ErrorHandler.NotFound("User not found")
         return {"message": "User deleted successfully"}

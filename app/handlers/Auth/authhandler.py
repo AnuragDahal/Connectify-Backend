@@ -6,7 +6,7 @@ from datetime import timedelta
 from ...utils.envutils import Environment
 from ..exception import ErrorHandler
 from ...utils.jwtutil import create_access_token
-from ...utils.passhashutils import Encryptor
+from ...utils.passhashutils import Encrypt
 from ..User.userhandler import Validate
 from ...core.database import user_collection
 
@@ -22,7 +22,7 @@ class AuthHandler:
     @staticmethod
     async def HandleUserLogin(request: OAuth2PasswordRequestForm = Depends()):
         user_email = await user_collection.find_one({"email": request.username})
-        if user_email and Encryptor.verify_password(request.password, user_email["password"]):
+        if user_email and Encrypt.verify_password(request.password, user_email["password"]):
             access_token_expires = timedelta(
                 minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
             access_token = create_access_token(
