@@ -28,7 +28,7 @@ class PostsHandler:
         if images:
             for image in images:
                 img_id = image.filename.split(".")[0][:10]
-                img_byte = await image.read()
+                img_byte = image.read()
                 # Upload the image to the server
                 img_url = uploadImage(img_id, img_byte)
                 image_list = post_data["images"]
@@ -110,7 +110,7 @@ class PostsHandler:
         if images:
             for image in images:
                 img_id = image.filename.split(".")[0][:10]
-                img_byte = await image.read()
+                img_byte = image.file.read()
                 # Upload the image to the server
                 img_url = uploadImage(img_id, img_byte)
                 post_data["images"].append(img_url)
@@ -132,7 +132,7 @@ class PostsHandler:
             post = await post_collection.find_one({"_id": ObjectId(post_id)})
             if post:
                 img_id = file.filename.split(".")[0][:10]
-                img_byte = await file.read()
+                img_byte = file.file.read()
                 # Upload the image to the server
                 img_url = uploadImage(img_id, img_byte)
                 # Put the image in the document of the post

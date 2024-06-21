@@ -34,8 +34,8 @@ class UserManager:
                 **request.model_dump(exclude={"password"}), "password": hashed_password, "isEmailVerified": False}
             if image:
                 img_id = image.filename.split(".")[0][:10]
-                img_byte = await image.file.read()  # blocking code
-                img_url = await uploadImage(img_id, img_byte)  # blocking code
+                img_byte = image.file.read()  # blocking code
+                img_url = uploadImage(img_id, img_byte)  # blocking code
                 user_data["image"] = img_url
                 # Add the img url to the user's db
             new_user = await user_collection.insert_one(user_data)
