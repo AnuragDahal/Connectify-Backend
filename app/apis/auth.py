@@ -18,7 +18,7 @@ async def signup_user(
     image: UploadFile = File(None)
 ):
     request = schemas.UserDetails(name=name, email=email, password=password)
-    user = await UserManager.create(request, image)
+    user = await UserManager.HandleNewUserCreation(request, image)
     return user
 
 

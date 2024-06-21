@@ -21,7 +21,7 @@ class Validate:
 
 class UserManager:
     @staticmethod
-    async def create(request: schemas.UserDetails, image: Optional[UploadFile]):
+    async def HandleNewUserCreation(request: schemas.UserDetails, image: Optional[UploadFile]):
         """
         Insert a new user record.
         A unique `id` will be created and provided in the response.
@@ -43,7 +43,7 @@ class UserManager:
         return ErrorHandler.ALreadyExists("User already exists")
 
     @staticmethod
-    async def read():
+    async def HandleReadingUserRecords():
         """
         Retrieve all user records.
         """
@@ -59,12 +59,12 @@ class UserManager:
             raise ErrorHandler.NotFound("No user found")
 
     @staticmethod
-    async def update(old_email: str, new_email: str, password: str):
+    async def HandleEmailUpdate(old_email: str, new_email: str, password: str):
         """Update your email address."""
 
         # Check email from the cookie and the email to be updated are same
         if old_email == new_email:
-            return ErrorHandler.Bad(
+            return ErrorHandler.Error(
                 "Please Enter the new email")
 
         # Check the password of the user
@@ -73,11 +73,11 @@ class UserManager:
             return ErrorHandler.Unauthorized("Password is incorrect")
 
         # check if the new email entered is available or not
-        is_available = await Validate.verify_email(new_email.email)
+        is_available = await Validate.verify_email(new_email)
         if not is_available:
             user = await user_collection.find_one_and_update(
                 {"email": old_email},
-                {"$set": {"email": new_email.email, "isEmailVerified": False}},
+                {"$set": {"email": new_email, "isEmailVerified": False}},
                 return_document=ReturnDocument.AFTER)
 
             if user is None:
@@ -87,10 +87,15 @@ class UserManager:
             return ErrorHandler.ALreadyExists("The User with the given email already exists")
 
     @staticmethod
-    async def delete(user_email: str, res: Response):
+    async def HandleUserDeletion(user_email: str, password: str, res: Response):
         """
         Delete a user
         """
+        # Check the password is correct
+        user_details = await user_collection.find_one({"email": user_email})
+        if not Encrypt.verify_password(password, user_details["password"]):
+            return ErrorHandler.Unauthorized("Incorrect Password")
+
         # Delete the user through the email
         deleted_user = await user_collection.delete_one({"email": user_email})
         if deleted_user.deleted_count == 0:

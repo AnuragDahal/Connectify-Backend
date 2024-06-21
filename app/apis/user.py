@@ -13,21 +13,22 @@ router = APIRouter(prefix='/api/v1', tags=["Users"],
 @router.get("/user", response_model=List[schemas.UserDetails], status_code=status.HTTP_200_OK,)
 async def read_user():
 
-    user = await UserManager.read()
+    user = await UserManager.HandleReadingUserRecords()
     return user
 
 
-@router.patch("/update/{old_email}", dependencies=[Depends(get_current_user)], response_model=schemas.UserSignUp, status_code=status.HTTP_200_OK)
+@router.patch("/update/{old_email}", dependencies=[Depends(get_current_user)], response_model=schemas.UpdateUserEmail, status_code=status.HTTP_200_OK)
 async def update_user(new_email: str = Form(..., description="Enter the new email"), old_email: str = Depends(get_email_from_token), password: str = Form(..., description="Enter your password to update the email")):
 
-    update_data = await UserManager.update(old_email, new_email, password)
+    update_data = await UserManager.HandleEmailUpdate(old_email, new_email, password)
     return update_data
 
 
 @router.delete("/delete", dependencies=[Depends(get_current_user)], status_code=status.HTTP_200_OK,)
-async def delete_user(res: Response, email: str = Depends(get_email_from_token), depends=Depends(get_current_user)):
+async def delete_user(res: Response, email: str = Depends(get_email_from_token), password: str =
+                      Form(..., description="Enter the password to delete"), depends=Depends(get_current_user)):
 
-    user = await UserManager.delete(email, res)
+    user = await UserManager.HandleUserDeletion(email, password, res)
     return user
 
 
