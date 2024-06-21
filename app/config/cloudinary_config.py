@@ -13,17 +13,10 @@ load_dotenv()
 config = cloudinary.config(secure=True)
 
 
-# print("****1. Set up and configure the SDK:****\nCredentials: ",
-#       config.cloud_name, config.api_key, "\n")
-
 
 def uploadImage(img_id, img_file):
 
-    # Upload the image and get its URL
-    # ==============================
 
-    # Upload the image.
-    # Set the asset's public ID and allow overwriting the asset with new versions
     cloudinary.uploader.upload(img_file,
                                public_id=img_id, unique_filename=False, overwrite=True)
 

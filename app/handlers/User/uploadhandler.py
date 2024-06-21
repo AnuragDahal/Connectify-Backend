@@ -3,11 +3,12 @@ from ...core.database import user_collection
 from pymongo import ReturnDocument
 from .userhandler import Validate
 from ..exception import ErrorHandler
+from fastapi import UploadFile
 
 
 class UploadManager:
     @staticmethod
-    async def HandleUploadProfilePic(user_email, img):
+    async def HandleUploadProfilePic(user_email, img: UploadFile):
         """
         Upload the user profile picture.
         """
@@ -17,7 +18,7 @@ class UploadManager:
             if not isUser:
                 return ErrorHandler.NotFound("User not found")
             filename = img.filename.split(".")[0][:10]
-            img_bytes = await img.file.read()
+            img_bytes = img.file.read()
             # Upload the image and get its URL
             img_url = uploadImage(filename, img_bytes)
             # Save the image URL in the database
