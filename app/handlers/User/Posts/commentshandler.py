@@ -50,7 +50,7 @@ class CommentsHandler:
         return ErrorHandler.NotFound("No post found with the given post id")
 
     @staticmethod
-    async def HandleCommentUpdate(request: schemas.Comments, comment_id: str, email_from_header: str):
+    async def HandleCommentUpdate(request: schemas.Comments, comment_id: str,email_from_header: str):
         """Update the existing comment"""
         # Check the user updating the comment is the logged in user or not
         if request.commented_by != email_from_header:

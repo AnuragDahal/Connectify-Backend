@@ -30,13 +30,12 @@ async def get_comments(post_id: str = Path(..., description="The post id of the 
 
 @router.patch("/update", response_model=schemas.Comments, status_code=status.HTTP_200_OK)
 async def update_comment(
-    comment_id: str = Query(...,
-                            description="The comment id of the comment you want to update"),
-    post_id: str = Form(...),
-    commented_by: str = Form(...),
-    content: str = Form(...),
-    email: str = Depends(get_email_from_token)
-):
+        comment_id: str = Query(...,
+                                description="The comment id of the comment you want to update"),
+        post_id: str = Form(...),
+        commented_by: str = Depends(get_email_from_token),
+        content: str = Form(...),
+        email: str = Depends(get_email_from_token)):
     request = schemas.Comments(
         post_id=post_id, commented_by=commented_by, comment=content)
     updated_comment = await CommentsHandler.HandleCommentUpdate(request, comment_id, email)
