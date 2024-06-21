@@ -3,7 +3,7 @@ from starlette.responses import RedirectResponse
 from ..config.oauth_config import google, generate_state, validate_token
 from ..handlers.User.userhandler import Validate
 from ..core.database import user_collection
-from ..models.schemas import OauthUser
+
 
 router = APIRouter(tags=['Google OAuth'], prefix='/api/v1/google')
 
@@ -12,10 +12,8 @@ router = APIRouter(tags=['Google OAuth'], prefix='/api/v1/google')
 async def login(request: Request):
     state = generate_state()
     request.session['state'] = state
-    print("state:", state)
     # here the auth refers to the route defined below not the auth module
     redirect_uri = request.url_for('auth')
-    print(redirect_uri)
     return await google.authorize_redirect(request, redirect_uri, state=state)
 
 

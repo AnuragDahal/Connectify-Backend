@@ -59,34 +59,6 @@ class UserManager:
             raise ErrorHandler.NotFound("No user found")
 
     @staticmethod
-    async def HandleEmailUpdate(old_email: str, new_email: str, password: str):
-        """Update your email address."""
-
-        # Check email from the cookie and the email to be updated are same
-        if old_email == new_email:
-            return ErrorHandler.Error(
-                "Please Enter the new email")
-
-        # Check the password of the user
-        user_details = await user_collection.find_one({"email": old_email})
-        if not Encrypt.verify_password(password, user_details["password"]):
-            return ErrorHandler.Unauthorized("Password is incorrect")
-
-        # check if the new email entered is available or not
-        is_available = await Validate.verify_email(new_email)
-        if not is_available:
-            user = await user_collection.find_one_and_update(
-                {"email": old_email},
-                {"$set": {"email": new_email, "isEmailVerified": False}},
-                return_document=ReturnDocument.AFTER)
-
-            if user is None:
-                raise ErrorHandler.NotFound("User not found")
-            return user
-        else:
-            return ErrorHandler.ALreadyExists("The User with the given email already exists")
-
-    @staticmethod
     async def HandleUserDeletion(user_email: str, password: str, res: Response):
         """
         Delete a user

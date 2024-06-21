@@ -17,11 +17,11 @@ async def read_user():
     return user
 
 
-@router.patch("/update/{old_email}", dependencies=[Depends(get_current_user)], response_model=schemas.UpdateUserEmail, status_code=status.HTTP_200_OK)
-async def update_user(new_email: str = Form(..., description="Enter the new email"), old_email: str = Depends(get_email_from_token), password: str = Form(..., description="Enter your password to update the email")):
+@router.post("/profile", dependencies=[Depends(get_current_user)], status_code=status.HTTP_200_OK)
+async def upload_profile_pic(img: UploadFile = File(...), email: str = Depends(get_email_from_token)):
 
-    update_data = await UserManager.HandleEmailUpdate(old_email, new_email, password)
-    return update_data
+    img_upload = await UploadManager.HandleUploadProfilePic(email, img)
+    return img_upload
 
 
 @router.delete("/delete", dependencies=[Depends(get_current_user)], status_code=status.HTTP_200_OK,)
@@ -30,10 +30,3 @@ async def delete_user(res: Response, email: str = Depends(get_email_from_token),
 
     user = await UserManager.HandleUserDeletion(email, password, res)
     return user
-
-
-@router.post("/profile", dependencies=[Depends(get_current_user)], status_code=status.HTTP_200_OK)
-async def upload_profile_pic(img: UploadFile = File(...), email: str = Depends(get_email_from_token)):
-
-    img_upload = await UploadManager.HandleUploadProfilePic(email, img)
-    return img_upload
