@@ -13,7 +13,7 @@ router = APIRouter(prefix='/api/v1/posts',
 async def create_post(
     title: str = Form(...),
     content: Optional[str] = Form(None),
-    posted_by: str = Form(...),
+    posted_by: str = Depends(get_email_from_token),
     image: List[UploadFile] = File([])
 ):
     request = schemas.Post(title=title, content=content, posted_by=posted_by)

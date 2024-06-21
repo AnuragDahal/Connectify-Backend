@@ -8,7 +8,7 @@ from fastapi import UploadFile
 
 class UploadManager:
     @staticmethod
-    async def HandleUploadProfilePic(user_email, img: UploadFile):
+    async def HandleUploadProfilePic(user_email:str, img: UploadFile):
         """
         Upload the user profile picture.
         """
@@ -18,7 +18,7 @@ class UploadManager:
             if not isUser:
                 return ErrorHandler.NotFound("User not found")
             filename = img.filename.split(".")[0][:10]
-            img_bytes = img.file.read()
+            img_bytes = await img.read()
             # Upload the image and get its URL
             img_url = uploadImage(filename, img_bytes)
             # Save the image URL in the database
