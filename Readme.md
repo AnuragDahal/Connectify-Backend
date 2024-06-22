@@ -211,12 +211,12 @@ This document provides an overview of the API endpoints for our application, det
 **Authorization: Bearer (Required)** (on all routes)
 
 ### `POST /api/v1/posts/comments/create`
-- **Description:** This route is used to create a comment on a post.
+- Description This route is used to create a comment on a post.
 <details>
 <summary>Details</summary>
 
 
-- **Request Body:**
+- Request Body:
   - `post_id` (str): ID of the post to comment on
   - `content` (str): Content of the comment
 </details>
@@ -237,9 +237,9 @@ This document provides an overview of the API endpoints for our application, det
 <summary>Details</summary>
 
 
-- **Path Parameter:**
+- Path Parameter:
   - `comment_id` (str): ID of the comment to update
-- **Form Data:**
+- Form Data:
   - `content` (str): New content for the comment
   - `commented_by` (str): Email of the user who commented
   - `post_id` (str): ID of the post the comment belongs to
@@ -250,6 +250,6 @@ This document provides an overview of the API endpoints for our application, det
 <details>
 <summary>Details</summary>
 
-- **Path Parameter:**
+- Path Parameter:
   - `comment_id` (str): ID of the comment to delete
 </details>
