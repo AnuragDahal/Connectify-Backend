@@ -1,6 +1,6 @@
 # Connectify API Documentation
 
-This document provides an overview of the API endpoints for our application, detailing the routes and their respective functions.<br> [Click here to view the swagger docs](https://connectify-backend-t3b4.onrender.com)
+This document provides an overview of the API endpoints for our application, detailing the routes and their respective functions.<br> [Click here to view the swagger docs](https://connectify-backend-rkjt.onrender.com/docs)
 
 ## Authentication Routes
 
@@ -9,8 +9,11 @@ This document provides an overview of the API endpoints for our application, det
 <details>
 <summary>Details</summary>
 
-- **Request Body:**<br>
-    **Form Data:**
+**Request Body:**
+
+<br>
+
+  - **Form Data:**
   - `email` (str): Email address of the user
   - `password` (str): Password for the user
   - `username` (str): First name of the user
@@ -21,6 +24,7 @@ This document provides an overview of the API endpoints for our application, det
 - **Description:** This route is used to login a user.
 <details>
 <summary>Details</summary>
+
 - **Request Body:**<br>
     **Form Data:**
   - `email` (str): Email address of the user
@@ -81,23 +85,6 @@ This document provides an overview of the API endpoints for our application, det
 
 - **Authorization:** Bearer (Optional)
 - **Response Model:** `List[schemas.UserDetails]`
-- **Status Code:** 200 (OK)
-</details>
-
-### `PATCH /api/v1/update/{old_email}`
-- **Description:** This route is used to update a user's information.
-<details>
-<summary>Details</summary>
-
-- **Authorization:** Bearer (Required)
-- **Path Parameter:**
-  - `old_email` (str): Current email of the user
-- **Request Body:**
-  - `new_email` (str): New email address for the user (optional)
-- **Dependencies:**
-  - `get_current_user`: Ensures the user is authenticated
-  - `verify_token`: Validates the access token
-- **Response Model:** `schemas.UserSignUp`
 - **Status Code:** 200 (OK)
 </details>
 
@@ -216,7 +203,7 @@ This document provides an overview of the API endpoints for our application, det
 <summary>Details</summary>
 
 
-- Request Body:
+- **Request Body:**
   - `post_id` (str): ID of the post to comment on
   - `content` (str): Content of the comment
 </details>
@@ -239,7 +226,7 @@ This document provides an overview of the API endpoints for our application, det
 
 - Path Parameter:
   - `comment_id` (str): ID of the comment to update
-- Form Data:
+- **Form Data:**
   - `content` (str): New content for the comment
   - `commented_by` (str): Email of the user who commented
   - `post_id` (str): ID of the post the comment belongs to
