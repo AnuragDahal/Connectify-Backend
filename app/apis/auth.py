@@ -36,16 +36,14 @@ async def logout(res: Response):
 
 @router.post("/verify", status_code=status.HTTP_200_OK)
 async def email_verification(email: Annotated[str, Query(..., description="Email to verify")], p: str = Depends(get_email_from_token)):
-    is_verified = await EmailHandler.HandleEmailVerification(email)
+    is_verified = await EmailHandler.HandleEmailVerification(email,p)
     return is_verified
 
 
 @router.post("/otp", status_code=status.HTTP_200_OK)
 async def otp_verification(
     otp: Annotated[str, Query(..., description="OTP to verify")],
-    email: Annotated[str,
-                     Query(..., description="Email for OTP verification")],
-    p: str = Depends(get_email_from_token),
+    email: str = Depends(get_email_from_token),
 ):
     is_verified = await EmailHandler.HandleOtpVerification(otp, email)
     return is_verified

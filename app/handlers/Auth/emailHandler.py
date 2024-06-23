@@ -75,9 +75,10 @@ class EmailHandler:
         return False
 
     @staticmethod
-    async def HandleEmailVerification(recipient: str):
+    async def HandleEmailVerification(recipient: str, user_email: str):
         try:
-            # Check the email with the email in headers
+            if recipient != user_email:
+                return ErrorHandler.Unauthorized("Invalid Email Address")
             otp = EmailHandler.generate_email_verification_otp()
             isEmailSent = EmailHandler.send_email_to(recipient, otp)
             # Add the otp to the database
