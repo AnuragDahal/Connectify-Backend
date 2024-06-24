@@ -28,8 +28,8 @@ async def get_posts():
 
 
 @router.delete("/delete", status_code=status.HTTP_200_OK)
-async def delete_post(post_id: str = Query(...)):
-    post = await PostsHandler.HandlePostDeletion(post_id)
+async def delete_post(post_id: str = Query(...), user_logged_in: str = Depends(get_email_from_token)):
+    post = await PostsHandler.HandlePostDeletion(post_id, user_logged_in)
     return post
 
 

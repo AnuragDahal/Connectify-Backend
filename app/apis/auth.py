@@ -29,14 +29,14 @@ async def login(request: OAuth2PasswordRequestForm = Depends()):
 
 
 @router.post("/logout")
-async def logout(res: Response):
+async def logout(res: Response, depends: str = Depends(get_current_user)):
     user_out = await AuthHandler.HandleUserLogout(res)
     return user_out
 
 
 @router.post("/verify", status_code=status.HTTP_200_OK)
-async def email_verification(email: Annotated[str, Query(..., description="Email to verify")], p: str = Depends(get_email_from_token)):
-    is_verified = await EmailHandler.HandleEmailVerification(email,p)
+async def email_verification(email: Annotated[str, Query(..., description="Email to verify")], p: str = Depends(get_email_from_token), depends: str = Depends(get_current_user)):
+    is_verified = await EmailHandler.HandleEmailVerification(email, p)
     return is_verified
 
 
@@ -44,6 +44,7 @@ async def email_verification(email: Annotated[str, Query(..., description="Email
 async def otp_verification(
     otp: Annotated[str, Query(..., description="OTP to verify")],
     email: str = Depends(get_email_from_token),
+    depends: str = Depends(get_current_user)
 ):
     is_verified = await EmailHandler.HandleOtpVerification(otp, email)
     return is_verified
