@@ -68,20 +68,26 @@ class PostsHandler:
             raise ErrorHandler.NotFound("Post not found")
 
     @staticmethod
-    async def HandleUserPostsRetrieval(email):
+    async def HandleUserPostsRetrieval(email, user_logged_in):
         """
         Get all the posts of a specific user.
         """
-        if await Validate.verify_email(email):
-            post_count = await post_collection.count_documents({"posted_by": email})
-            if post_count == 0:
-                raise ErrorHandler.NotFound("No posts found for user")
-            else:
-                posts_cursor = post_collection.find({"posted_by": email})
-                posts = await posts_cursor.to_list(length=None)
-                return posts
+        # Check if there are any posts by the user first to avoid multiple database calls
+        post_count = await post_collection.count_documents({"posted_by": email})
+        if post_count == 0:
+            raise ErrorHandler.NotFound("No posts found for user")
+
+        # If the requester is the user or a friend, adjust the privacy filter accordingly
+        if email == user_logged_in:
+            privacy_filter = {}
         else:
-            raise ErrorHandler.NotFound("User not found")
+            isFriend = await user_collection.find_one({"email": user_logged_in, "friends": email})
+            if isFriend:
+                privacy_filter = {"privacy": {"$ne": "private"}}
+            privacy_filter = {"privacy": "public"}
+        # Fetch posts with the determined privacy filter
+        posts = await post_collection.find({"posted_by": email, **privacy_filter}).to_list(length=None)
+        return posts
 
     @staticmethod
     async def HandlePostUpdate(request: schemas.PostUpdate, user_logged_in: str, post_id: str, images: Optional[List[UploadFile]]):
