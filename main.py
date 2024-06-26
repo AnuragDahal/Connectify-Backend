@@ -1,11 +1,10 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, Query, Response
 from app.apis import user, auth, google, posts, comments, friends
 from fastapi.middleware.cors import CORSMiddleware
-from app.core.database import client, db
+from app.core.database import client
 from starlette.middleware.sessions import SessionMiddleware
 from app.utils.envutils import Environment
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
+
 
 env = Environment()
 
@@ -38,7 +37,8 @@ def root():
 
 
 @app.get('/home')
-def home():
+def home(res: Response = None, token: str = Query(...)):
+    # res.set_cookie(key="token", value=token, expires=18000)
     return {"message": "You have been logged in through Google OAuth."}
 
 

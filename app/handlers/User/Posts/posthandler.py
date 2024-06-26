@@ -25,7 +25,7 @@ class PostsHandler:
             **request.model_dump(exclude=None)}
         if images:
             for image in images:
-                img_id = image.filename.split(".")[0][:10]
+                img_id = image.filename.split(".")[0][:]
                 img_byte = await image.read()
                 # Upload the image to the server
                 img_url = uploadImage(img_id, img_byte)

@@ -1,9 +1,9 @@
 from fastapi import HTTPException, APIRouter, Request
-from starlette.responses import RedirectResponse
+from starlette.responses import RedirectResponse, JSONResponse
 from ..config.oauth_config import google, generate_state, validate_token
 from ..handlers.User.userhandler import Validate
 from ..core.database import user_collection
-
+from ..utils.jwtutil import create_access_token
 
 router = APIRouter(tags=['Google OAuth'], prefix='/api/v1/google')
 
@@ -59,9 +59,11 @@ async def auth(request: Request):
                 "comments_on_posts": [],
                 "likes": [],
             })
+        # Generate a access token for the user to access the api
+        access_token = create_access_token(data={"sub": user_email})
 
     except Exception as e:
         print(f"Token validation error: {e}")
         raise HTTPException(status_code=400, detail='Invalid token.')
 
-    return RedirectResponse(url='/home')
+    return RedirectResponse(url=f'/home?token={access_token}')
