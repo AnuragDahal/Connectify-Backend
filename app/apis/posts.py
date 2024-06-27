@@ -21,7 +21,7 @@ async def create_post(
     return new_post
 
 
-@router.get("/read/public", response_model=List[schemas.Post], status_code=status.HTTP_200_OK)
+@router.get("/read/public", response_model=List[schemas.PostReceive], status_code=status.HTTP_200_OK)
 async def get_posts():
     posts = await PostsHandler.HandlePublicPostReadings()
     return posts

@@ -46,7 +46,7 @@ class PostsHandler:
             public_posts = [
                 document for document in documents if document["privacy"] == "public"]
             if public_posts:
-                return public_posts
+                return [{"id": str(post["_id"]), **post} for post in public_posts]
             return ErrorHandler.NotFound("No public posts found")
         return ErrorHandler.NotFound("No posts found")
 
