@@ -78,16 +78,22 @@ class PostsHandler:
             raise ErrorHandler.NotFound("No posts found for user")
 
         # If the requester is the user or a friend, adjust the privacy filter accordingly
+        # Default to public if none of the conditions below are met
+        privacy_filter = {"privacy": "public"}
         if email == user_logged_in:
-            privacy_filter = {}
+            privacy_filter = {}  # No privacy filter needed if the user is retrieving their own posts
         else:
             isFriend = await user_collection.find_one({"email": user_logged_in, "friends": email})
             if isFriend:
+                # Show non-private posts if the requester is a friend
                 privacy_filter = {"privacy": {"$ne": "private"}}
-            privacy_filter = {"privacy": "public"}
+
         # Fetch posts with the determined privacy filter
         posts = await post_collection.find({"posted_by": email, **privacy_filter}).to_list(length=None)
-        return posts
+        # Convert each post document to a dictionary and add a stringified ID
+        posts_with_details = [
+            {"id": str(post["_id"]), **post} for post in posts]
+        return posts_with_details
 
     @staticmethod
     async def HandlePostUpdate(request: schemas.PostUpdate, user_logged_in: str, post_id: str, images: Optional[List[UploadFile]]):

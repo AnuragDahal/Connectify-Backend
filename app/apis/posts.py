@@ -33,9 +33,9 @@ async def delete_post(post_id: str = Query(...), user_logged_in: str = Depends(g
     return post
 
 
-@router.get("/{email}", response_model=List[schemas.Post], status_code=status.HTTP_200_OK)
-async def get_user_posts(email: str = Path(...)):
-    posts = await PostsHandler.HandleUserPostsRetrieval(email)
+@router.get("/{email}", response_model=List[schemas.PostReceive], status_code=status.HTTP_200_OK)
+async def get_user_posts(email: str = Path(...), user_logged_in: str = Depends(get_email_from_token)):
+    posts = await PostsHandler.HandleUserPostsRetrieval(email, user_logged_in)
     return posts
 
 
