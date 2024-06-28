@@ -7,6 +7,7 @@ from ..utils.jwtutil import create_access_token
 
 router = APIRouter(tags=['Google OAuth'], prefix='/api/v1/google')
 
+
 @router.get('/login')
 async def login(request: Request):
     state = generate_state()
@@ -14,15 +15,16 @@ async def login(request: Request):
     redirect_uri = request.url_for('auth')
     return await google.authorize_redirect(request, redirect_uri, state=state)
 
+
 @router.get('/auth')
 async def auth(request: Request):
     state = request.session.get('state')
     stateInQuery = request.query_params.get('state')
     if not state or state != stateInQuery:
         # Log the mismatch for debugging purposes
-        print(f"State mismatch: session state {state} != query state {stateInQuery}")
+      
         raise HTTPException(
-            status_code=400, detail='State parameter mismatch.')
+            status_code=400, detail=f"State mismatch: session state {state} != query state {stateInQuery}")
 
     token = await google.authorize_access_token(request)
     id_token = token.get('id_token')
