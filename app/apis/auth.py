@@ -28,7 +28,7 @@ async def login(request: OAuth2PasswordRequestForm = Depends()):
     return user_in
 
 
-@router.post("/logout")
+@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
 async def logout(res: Response, depends: str = Depends(get_current_user)):
     user_out = await AuthHandler.HandleUserLogout(res)
     return user_out
