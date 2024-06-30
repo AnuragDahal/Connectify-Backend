@@ -4,6 +4,10 @@ from ..config.oauth_config import google, generate_state, validate_token
 from ..handlers.User.userhandler import Validate
 from ..core.database import user_collection
 from ..utils.jwtutil import create_access_token
+from ..handlers.exception import ErrorHandler
+from ..utils.envutils import Environment
+env = Environment()
+
 
 router = APIRouter(tags=['Google OAuth'], prefix='/api/v1/google')
 
@@ -20,21 +24,15 @@ async def login(request: Request):
 @router.get('/auth')
 async def auth(request: Request):
     state = request.session.get('state')
-    # print(f"State: {state}")
     stateInQuery = request.query_params.get('state')
-    # print(f"State in query: {stateInQuery}")
     if not state or state != stateInQuery:
-        #     # Log the mismatch for debugging purposes
-
-        raise HTTPException(
-            status_code=400, detail=f"State mismatch: session state {state} != query state {stateInQuery}")
+        return ErrorHandler.Error(f"State mismatch: session state {state} != query state {stateInQuery}")
 
     token = await google.authorize_access_token(request)
     id_token = token.get('id_token')
 
     if not id_token:
-        raise HTTPException(
-            status_code=400, detail='Unable to authenticate.')
+        return ErrorHandler.Unauthorized('Unable to authenticate.')
 
     try:
         claims = validate_token(id_token)
@@ -58,9 +56,10 @@ async def auth(request: Request):
                 "comments_on_posts": [],
                 "likes": [],
             })
-        access_token = create_access_token(data={"sub": user_email})
+        access_token = create_access_token(
+            data={"sub": user_email}, expires_delta=env.ACCESS_TOKEN_EXPIRE_MINUTES)
     except Exception as e:
         print(f"Token validation error: {e}")
-        raise HTTPException(status_code=400, detail='Invalid token.')
+        return ErrorHandler.Unauthorized('Invalid token.')
 
     return RedirectResponse(url=f'/home?token={access_token}')
