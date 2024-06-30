@@ -39,8 +39,8 @@ class AuthHandler:
                                 httponly=True,
                                 secure=True,
                                 samesite="None",
-                                domain="https://localhost:5173",
-                                path="/",
+                                domain="http://localhost:5173",
+                                path="/"
                                 )
 
             return response
