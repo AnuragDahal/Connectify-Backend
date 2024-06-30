@@ -10,24 +10,24 @@ router = APIRouter(tags=['Google OAuth'], prefix='/api/v1/google')
 
 @router.get('/login')
 async def login(request: Request):
-    # state = generate_state()
-    # request.session['state'] = state
+    state = generate_state()
+    request.session['state'] = state
     redirect_uri = request.url_for('auth')
     # print(f"State in /login: {state}")
-    return await google.authorize_redirect(request, redirect_uri)
+    return await google.authorize_redirect(request, redirect_uri, state=state)
 
 
 @router.get('/auth')
 async def auth(request: Request):
-    # state = request.session.get('state')
+    state = request.session.get('state')
     # print(f"State: {state}")
-    # stateInQuery = request.query_params.get('state')
+    stateInQuery = request.query_params.get('state')
     # print(f"State in query: {stateInQuery}")
-    # if not state or state != stateInQuery:
-    #     # Log the mismatch for debugging purposes
+    if not state or state != stateInQuery:
+        #     # Log the mismatch for debugging purposes
 
-    #     raise HTTPException(
-    #         status_code=400, detail=f"State mismatch: session state {state} != query state {stateInQuery}")
+        raise HTTPException(
+            status_code=400, detail=f"State mismatch: session state {state} != query state {stateInQuery}")
 
     token = await google.authorize_access_token(request)
     id_token = token.get('id_token')
