@@ -33,8 +33,15 @@ class AuthHandler:
                          "token_type": TOKEN_TYPE}
             )
 
-            response.set_cookie(key=TOKEN_KEY, value=access_token,
-                                expires=access_token_expires.total_seconds())
+            response.set_cookie(key=TOKEN_KEY,
+                                value=access_token,
+                                expires=access_token_expires.total_seconds(),
+                                httponly=True,
+                                secure=True,
+                                samesite="None",
+                                domain="https://localhost:5173",
+                                path="/",
+                                )
 
             return response
         return ErrorHandler.NotFound("User not found")
