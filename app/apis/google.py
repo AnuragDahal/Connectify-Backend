@@ -10,11 +10,11 @@ router = APIRouter(tags=['Google OAuth'], prefix='/api/v1/google')
 
 @router.get('/login')
 async def login(request: Request):
-    state = generate_state()
-    request.session['state'] = state
+    # state = generate_state()
+    # request.session['state'] = state
     redirect_uri = request.url_for('auth')
-    print(f"State in /login: {state}")
-    return await google.authorize_redirect(request, redirect_uri, state=state)
+    # print(f"State in /login: {state}")
+    return await google.authorize_redirect(request, redirect_uri)
 
 
 @router.get('/auth')
