@@ -6,6 +6,7 @@ from ..core.database import user_collection
 from ..utils.jwtutil import create_access_token
 from ..handlers.exception import ErrorHandler
 from ..utils.envutils import Environment
+from datetime import timedelta
 env = Environment()
 
 
@@ -56,8 +57,10 @@ async def auth(request: Request):
                 "comments_on_posts": [],
                 "likes": [],
             })
+        access_token_expires = timedelta(
+            minutes=env.ACCESS_TOKEN_EXPIRE_MINUTES)
         access_token = create_access_token(
-            data={"sub": user_email}, expires_delta=env.ACCESS_TOKEN_EXPIRE_MINUTES)
+            data={"sub": user_email}, expires_delta=access_token_expires)
     except Exception as e:
         print(f"Token validation error: {e}")
         return ErrorHandler.Unauthorized('Invalid token.')
