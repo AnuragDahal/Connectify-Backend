@@ -58,7 +58,7 @@ async def auth(request: Request):
                 "likes": [],
             })
         access_token_expires = timedelta(
-            minutes=env.ACCESS_TOKEN_EXPIRE_MINUTES)
+            minutes=env.ACCESS_TOKEN_EXPIRE_DAYS)
         access_token = create_access_token(
             data={"sub": user_email}, expires_delta=access_token_expires)
     except Exception as e:
