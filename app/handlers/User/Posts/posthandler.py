@@ -227,3 +227,12 @@ class PostsHandler:
             return {"message": "Post privacy updated to "+privacy}
         else:
             return ErrorHandler.NotFound("Post not found")
+
+    @staticmethod
+    async def HanldePostRetrievalById(post_id: str):
+
+        post = await post_collection.find_one({"_id": ObjectId(post_id)})
+        if post:
+            return post
+        else:
+            return ErrorHandler.NotFound("Post not found")

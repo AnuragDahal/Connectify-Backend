@@ -27,6 +27,13 @@ async def get_posts():
     return posts
 
 
+@router.get("/read/{id}", response_model=schemas.Post, status_code=status.HTTP_200_OK)
+async def get_post_by_id(id: str = Path(...), user_logged_in: str = Depends(get_email_from_token)):
+
+    post = await PostsHandler.HanldePostRetrievalById(id)
+    return post
+
+
 @router.delete("/delete", status_code=status.HTTP_200_OK)
 async def delete_post(post_id: str = Query(...), user_logged_in: str = Depends(get_email_from_token)):
     post = await PostsHandler.HandlePostDeletion(post_id, user_logged_in)
