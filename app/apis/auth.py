@@ -1,5 +1,5 @@
 from fastapi.security import OAuth2PasswordRequestForm
-from fastapi import APIRouter, Depends, status, Response, Form, UploadFile, File, Query, Request
+from fastapi import APIRouter, Depends, status, Response, Query, Body
 from typing import Annotated
 from ..handlers.Auth.authhandler import AuthHandler
 from ..handlers.User.userhandler import UserManager
@@ -12,13 +12,12 @@ router = APIRouter(prefix='/api/v1', tags=["Auth"])
 
 @router.post("/signup", status_code=status.HTTP_201_CREATED)
 async def signup_user(
-    name: Annotated[str, Form(..., description="User's name")],
-    email: Annotated[str, Form(..., description="User's email")],
-    password: Annotated[str, Form(..., description="User's password")],
-    image: UploadFile = File(None)
+    name: Annotated[str, Body(..., description="User's name")],
+    email: Annotated[str, Body(..., description="User's email")],
+    password: Annotated[str, Body(..., description="User's password")],
 ):
     request = schemas.UserDetails(name=name, email=email, password=password)
-    user = await UserManager.HandleNewUserCreation(request, image)
+    user = await UserManager.HandleNewUserCreation(request)
     return user
 
 

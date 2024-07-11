@@ -10,9 +10,6 @@ from ...handlers.exception import ErrorHandler
 from datetime import datetime, timezone
 env = Environment()
 
-'''
-The @staticmethod decorator is used to declare a method as a static method, which means it belongs to the class and not the instance of the class. It can be called on the class itself, rather than on an instance of the class.'''
-
 
 class EmailHandler:
     '''
@@ -35,14 +32,14 @@ class EmailHandler:
     <body>
         <p>Dear User,</p>
 
-        <p>We recently received a request for a new login or signup associated with this email address. If you initiated this request, please enter the following verification code to confirm your identity:</p>
+        <p>We recently received a request for a new login or signup request associated with this email address. If you initiated this request, please enter the following verification code to confirm your identity:</p>
 
         <p><b>Verification Code: {otp}</b></p>
 
         <p>If you did not initiate this request, please disregard this email and no changes will be made to your account.</p>
 
         <p>Thank you,<br>
-        The Connectify Team</p>
+        The WebService Team</p>
     </body>
     </html>
     """
