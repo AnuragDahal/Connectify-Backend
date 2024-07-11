@@ -9,8 +9,8 @@ class Environment():
         self.MONGO_URI = os.getenv("MONGO_URI")
         self.SECRET_KEY = os.getenv("SECRET_KEY")
         self.ALGORITHM = os.getenv("ALGORITHM")
-        self.ACCESS_TOKEN_EXPIRE_DAYS = int(os.getenv(
-            "ACCESS_TOKEN_EXPIRE_DAYS"))
+        self.ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv(
+            "ACCESS_TOKEN_EXPIRE_MINUTES"))
         self.TOKEN_TYPE = "bearer"
         self.TOKEN_KEY = "token"
         self.CLIENT_ID = os.environ.get('CLIENT_ID')

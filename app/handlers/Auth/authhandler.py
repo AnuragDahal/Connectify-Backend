@@ -13,7 +13,7 @@ from ...core.database import user_collection
 env = Environment()
 SECRET_KEY = env.SECRET_KEY
 ALGORITHM = env.ALGORITHM
-ACCESS_TOKEN_EXPIRE_DAYS = env.ACCESS_TOKEN_EXPIRE_DAYS
+ACCESS_TOKEN_EXPIRE_MINUTES = env.ACCESS_TOKEN_EXPIRE_MINUTES
 TOKEN_TYPE = env.TOKEN_TYPE
 TOKEN_KEY = env.TOKEN_KEY
 
@@ -24,7 +24,7 @@ class AuthHandler:
         user_email = await user_collection.find_one({"email": request.username})
         if user_email and Encrypt.verify_password(request.password, user_email["password"]):
             access_token_expires = timedelta(
-                days=ACCESS_TOKEN_EXPIRE_DAYS)
+                minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
             access_token = create_access_token(
                 data={"sub": user_email["email"]}, expires_delta=access_token_expires)
 
@@ -47,7 +47,7 @@ class AuthHandler:
             return response
         return ErrorHandler.NotFound("User not found")
 
-    @ staticmethod
+    @staticmethod
     async def HandleUserLogout(res: Response):
         try:
             res.delete_cookie(key=TOKEN_KEY)

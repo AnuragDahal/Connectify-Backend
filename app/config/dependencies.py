@@ -27,36 +27,23 @@ async def verify_token(req: Request, res: Response):
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
-        try:
-            payload = jwt.decode(token, env.SECRET_KEY,
-                                 algorithms=[env.algorithm])
-        except jwt.ExpiredSignatureError:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Token expired",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-        except JWTError:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Could not validate credentials",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-
+        payload = jwt.decode(token, env.SECRET_KEY, algorithms=[env.algorithm])
         email: str = payload.get("sub")
         password: str = payload.get("password")
         # Check the password from the token
         user = await user_collection.find_one({"email": email})
-        if not user or not Encrypt.verify_password(password, user["password"]):
+        if not user["email"] and Encrypt.verify_password(password, user["password"]):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Could not validate credentials: Incorrect email or password",
+                detail="Could not validate credentials: 'sub' claim missing",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-    except HTTPException as e:
-        raise e
-    except Exception as e:
+        # req.state.token_data = token_data  # Store the token_data in the request state
+    except JWTError:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred while verifying the token.",
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
         )
+
+    return res
