@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Query, Response
-from app.apis import user, auth, google
+from app.apis import user, auth, google, posts, comments, friends
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.database import client
 from starlette.middleware.sessions import SessionMiddleware
@@ -13,7 +13,7 @@ app = FastAPI(title="CONNECTIFY", version="0.1.0")
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=["http://localhost:5173","http://localhost:8000"],
+    allow_origins=["http://localhost:5173", "http://localhost:8000"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -42,3 +42,6 @@ def home(res: Response = None, token: str = Query(...)):
 app.include_router(user.router)
 app.include_router(auth.router)
 app.include_router(google.router)
+app.include_router(posts.router)
+app.include_router(comments.router)
+app.include_router(friends.router)
