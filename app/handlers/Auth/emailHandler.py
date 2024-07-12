@@ -23,7 +23,7 @@ class EmailHandler:
         return str(random.randint(100000, 999999))
 
     @staticmethod
-    def send_email_to(recipient: str, otp: int):
+    def send_email_to(recipient: str, otp: int, htmlContent: str, message: dict):
         # Define your Gmail username and password
         gmail_user = env.GMAIL_USER
         gmail_password = env.APP_SPECIFIC_PASS
@@ -48,8 +48,8 @@ class EmailHandler:
     """
         # Add the HTML content to the MIMEMultipart object
         msg.attach(MIMEText(html, 'html'))
-        msg['Subject'] = 'Connectify Account Verification'
-        msg['From'] = gmail_user
+        msg['Subject'] = message["subject"]
+        msg['From'] = "no-reply@connectify.com"
         msg['To'] = recipient
 
         # Connect to the Gmail server

@@ -1,14 +1,14 @@
 from ...config.cloudinary_config import uploadImage
 from ...core.database import user_collection
 from pymongo import ReturnDocument
-from .userhandler import Validate
+from ..Auth.authhandler import Validate
 from ..exception import ErrorHandler
 from fastapi import UploadFile
 
 
 class UploadManager:
     @staticmethod
-    async def HandleUploadProfilePic(user_email:str, img: UploadFile):
+    async def HandleUploadProfilePic(user_email: str, img: UploadFile):
         """
         Upload the user profile picture.
         """
