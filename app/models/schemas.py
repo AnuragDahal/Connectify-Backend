@@ -12,7 +12,7 @@ class Privacy(str, Enum):
 
 class UserSignUp(BaseModel):
     name: str
-    email: str
+    email: EmailStr
     password: constr
 
 
@@ -38,7 +38,7 @@ class Comments(BaseModel):
 class Post(BaseModel):
     title: str
     content: str = None
-    posted_by: str = None
+    posted_by: EmailStr = None
     posted_on: datetime = datetime.now(timezone.utc)
     images: Optional[List[str]] = []
     likes: Optional[List[str]] = []
@@ -61,7 +61,7 @@ class PostReceive(BaseModel):
     id: str
     title: str
     content: str = None
-    posted_by: str = None
+    posted_by: EmailStr = None
     posted_on: datetime = datetime.now(timezone.utc)
     images: Optional[List[str]] = []
     likes: Optional[List[str]] = []

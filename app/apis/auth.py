@@ -45,7 +45,7 @@ async def logout(res: Response, depends: str = Depends(get_current_user)):
 
 
 @router.post("/verify", status_code=status.HTTP_200_OK)
-async def email_verification(email: Annotated[str, Query(..., description="Email to verify")], p: str = Depends(get_email_from_token), depends: str = Depends(get_current_user)):
+async def email_verification(email: Annotated[EmailStr, Query(..., description="Email to verify")], p: str = Depends(get_email_from_token), depends: str = Depends(get_current_user)):
     is_verified = await EmailHandler.HandleEmailVerification(email, p)
     return is_verified
 

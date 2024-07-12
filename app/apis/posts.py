@@ -1,5 +1,6 @@
 from fastapi import APIRouter, status, UploadFile, File, Form, Query, Path, Depends
 from typing import List, Optional
+from pydantic import EmailStr
 from ..handlers.User.Posts.posthandler import PostsHandler
 from ..models import schemas
 from ..config.dependencies import get_current_user
@@ -13,7 +14,7 @@ router = APIRouter(prefix='/api/v1/posts',
 async def create_post(
     title: str = Form(...),
     content: Optional[str] = Form(None),
-    posted_by: str = Depends(get_email_from_token),
+    posted_by: EmailStr = Depends(get_email_from_token),
     image: List[UploadFile] = File([])
 ):
     request = schemas.Post(title=title, content=content, posted_by=posted_by)
@@ -28,20 +29,20 @@ async def get_posts():
 
 
 @router.get("/read/{id}", response_model=schemas.Post, status_code=status.HTTP_200_OK)
-async def get_post_by_id(id: str = Path(...), user_logged_in: str = Depends(get_email_from_token)):
+async def get_post_by_id(id: str = Path(...), user_logged_in: EmailStr = Depends(get_email_from_token)):
 
     post = await PostsHandler.HanldePostRetrievalById(id)
     return post
 
 
 @router.delete("/delete", status_code=status.HTTP_200_OK)
-async def delete_post(post_id: str = Query(...), user_logged_in: str = Depends(get_email_from_token)):
+async def delete_post(post_id: str = Query(...), user_logged_in: EmailStr = Depends(get_email_from_token)):
     post = await PostsHandler.HandlePostDeletion(post_id, user_logged_in)
     return post
 
 
 @router.get("/{email}", response_model=List[schemas.PostReceive], status_code=status.HTTP_200_OK)
-async def get_user_posts(email: str = Path(...), user_logged_in: str = Depends(get_email_from_token)):
+async def get_user_posts(email: EmailStr = Path(...), user_logged_in: EmailStr = Depends(get_email_from_token)):
     posts = await PostsHandler.HandleUserPostsRetrieval(email, user_logged_in)
     return posts
 
@@ -70,7 +71,7 @@ async def update_post(
 @router.patch("/like", status_code=status.HTTP_200_OK)
 async def like_post(
     post_id: str = Query(...),
-    liked_by_user: str = Form(...)
+    liked_by_user: str = Query(...)
 ):
     like = await PostsHandler.HandlePostLike(post_id, liked_by_user)
     return like
@@ -83,7 +84,7 @@ async def get_likes_count(post_id: str = Query(...)):
 
 
 @router.get("/friend/show", response_model=List[schemas.Post], status_code=status.HTTP_200_OK)
-async def get_post_of_friend(friend_email: str = Query(...), user_logged_in: str = Depends(get_email_from_token)):
+async def get_post_of_friend(friend_email: EmailStr = Query(...), user_logged_in: EmailStr = Depends(get_email_from_token)):
     print(user_logged_in)
     posts = await PostsHandler.HandleFriendPostsRetrieval(
         friend_email, user_logged_in)
@@ -95,7 +96,7 @@ async def update_post_privacy(
 
     post_id: str = Query(...),
     privacy: str = Query(...),
-    email: str = Depends(get_email_from_token)
+    email: EmailStr = Depends(get_email_from_token)
 ):
     post = await PostsHandler.HandlePostPrivacyUpdate(post_id, privacy, email)
     return post
