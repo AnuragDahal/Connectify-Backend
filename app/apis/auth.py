@@ -44,8 +44,38 @@ async def logout(res: Response, depends: str = Depends(get_current_user)):
     return user_out
 
 
+@router.post("/forgot", status_code=status.HTTP_200_OK)
+async def forgot_password(email: Annotated[EmailStr, Query(..., description="Email to verify")],
+                          p: EmailStr = Depends(get_email_from_token),
+                          depends: str = Depends(get_current_user)):
+
+    is_verified = await AuthHandler.HandleForgotPassword(email, p)
+    return is_verified
+
+
+@router.post("/reset/verify", status_code=status.HTTP_200_OK)
+async def verify_password_reset_token(
+        token: str = Query(...),
+        email: EmailStr = Depends(get_email_from_token),
+        depends: str = Depends(get_current_user)):
+
+    is_verified = await AuthHandler.HandlePasswordResetTokenVerification(email, token)
+    return is_verified
+
+
+@router.post("/password/reset", status_code=status.HTTP_200_OK)
+async def reset_password(password: str, confirm_password: str,
+                         email: EmailStr = Depends(get_email_from_token),
+                         depends: str = Depends(get_current_user)):
+
+    if not re.match(PASSWORD_REGEX, password):
+        return ErrorHandler.Error("Password validation failed")
+    is_reset = await AuthHandler.HandlePasswordReset(email, password, confirm_password)
+    return is_reset
+
+
 @router.post("/verify", status_code=status.HTTP_200_OK)
-async def email_verification(email: Annotated[EmailStr, Query(..., description="Email to verify")], p: str = Depends(get_email_from_token), depends: str = Depends(get_current_user)):
+async def email_verification(email: Annotated[EmailStr, Query(..., description="Email to verify")], p: EmailStr = Depends(get_email_from_token), depends: str = Depends(get_current_user)):
     is_verified = await EmailHandler.HandleEmailVerification(email, p)
     return is_verified
 
