@@ -8,7 +8,7 @@ from fastapi import UploadFile
 
 class UploadManager:
     @staticmethod
-    async def HandleUploadProfilePic(user_email: str, img: UploadFile):
+    async def HandleUploadProfilePic(user_email:str, img: UploadFile):
         """
         Upload the user profile picture.
         """
