@@ -1,9 +1,11 @@
-from fastapi import FastAPI, Query, Response
+from fastapi import FastAPI, Query, Response, Request
 from app.apis import user, auth, google, posts, comments, friends
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.database import client
 from starlette.middleware.sessions import SessionMiddleware
 from app.utils.envutils import Environment
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 
 
 env = Environment()
@@ -25,6 +27,16 @@ try:
 except Exception as e:
     print("Failed to connect to MongoDB")
     print(e)
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    # Customize the response as needed
+    return JSONResponse(
+        status_code=422,
+        content={
+            "detail": "Invalid email type "},
+    )
 
 
 @app.get('/')

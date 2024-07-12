@@ -1,9 +1,7 @@
-from pydantic import BaseModel, Field
-from typing import List, Optional, Dict, Any
+from pydantic import BaseModel, EmailStr, constr
+from typing import List, Optional
 from datetime import datetime, timezone
-import uuid
 from enum import Enum
-from bson import ObjectId
 
 
 class Privacy(str, Enum):
@@ -15,12 +13,12 @@ class Privacy(str, Enum):
 class UserSignUp(BaseModel):
     name: str
     email: str
-    password: str
+    password: constr
 
 
 class OauthUser(BaseModel):
     name: str
-    email: str
+    email: EmailStr
     isEmailVerified: Optional[bool]
     isEmailVerified: Optional[bool] = False
     friends: Optional[List[str]] = []
@@ -79,7 +77,7 @@ class PostUpdate(BaseModel):
 
 class UserDetails(BaseModel):
     name: str
-    email: str
+    email: EmailStr
     password: str
     isEmailVerified: Optional[bool] = False
     friends: Optional[List[str]] = []
@@ -92,4 +90,4 @@ class UserDetails(BaseModel):
 
 
 class UpdateUserEmail(BaseModel):
-    email: str
+    email: EmailStr
