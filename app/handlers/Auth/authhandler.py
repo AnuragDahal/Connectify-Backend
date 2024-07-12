@@ -97,7 +97,7 @@ class AuthHandler:
     </body>
     </html>'''
         sub = "Password Reset Request"
-        sendEmail = EmailHandler.send_email_to(email, token, htmlContent, sub)
+        sendEmail = EmailHandler.send_email_to(email,htmlContent, sub)
         if not sendEmail:
             return ErrorHandler.Error("Email not sent successfully")
         return {"message": "Password reset email sent successfully"}

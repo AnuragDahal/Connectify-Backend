@@ -23,7 +23,7 @@ class EmailHandler:
         return str(random.randint(100000, 999999))
 
     @staticmethod
-    def send_email_to(recipient: str, otp: int, htmlContent: str, subject: str):
+    def send_email_to(recipient: str, htmlContent: str, subject: str):
         # Define your Gmail username and password
         gmail_user = env.GMAIL_USER
         gmail_password = env.APP_SPECIFIC_PASS
@@ -83,7 +83,7 @@ class EmailHandler:
                     """
             sub = "Email Verification"
             isEmailSent = EmailHandler.send_email_to(
-                recipient, otp, htmlContent, sub)
+                recipient, htmlContent, sub)
             # Add the otp to the database
             await otp_collection.insert_one(
                 {"email": recipient, "otp": otp, f"{flag}": True, "expires_on": datetime.now(timezone.utc)})
@@ -96,23 +96,22 @@ class EmailHandler:
 
     @staticmethod
     async def HandleOtpVerification(user_otp: str, user_email: str, flag: str):
-        # Get the otp from the database of the specific user
+        # Attempt to retrieve the OTP document for the user
         email_doc = await otp_collection.find_one({"email": user_email})
-        if email_doc is not None:
-            otp_in_db = email_doc["otp"]
-            # Verify the otp
-            isOtpVerified = EmailHandler.VerifyOtp(user_otp, otp_in_db)
-            if isOtpVerified and email_doc[f"{flag}"] is True:
-                # Check if the user exists in the user_collection
-                isUser = await user_collection.find_one({"email": user_email})
-                if not isUser:
-                    return ErrorHandler.NotFound("User not found in the database")
-                # Update the user's email verification status
-                await user_collection.update_one({"email": user_email},
-                                                 {"$set": {"isEmailVerified": True}})
-                # After updating the user's email verification status, delete the otp from the database
-                await otp_collection.find_one_and_delete({"email": user_email})
-                return "Email Verified Successfully"
-            else:
-                return ErrorHandler.Unauthorized("Email Verification Failed, incorrect OTP")
-        return ErrorHandler.Error("Invalid Email or OTP not found in the database")
+        if email_doc is None:
+            return ErrorHandler.Error("Invalid Email or OTP not found in the database")
+        # Verify the OTP and the flag
+        otp_in_db = email_doc["otp"]
+        isOtpVerified = EmailHandler.VerifyOtp(user_otp, otp_in_db)
+        if not isOtpVerified or not email_doc.get(flag, False):
+            return ErrorHandler.Unauthorized("Email Verification Failed, incorrect OTP")
+
+        # Ensure the user exists
+        isUser = await user_collection.find_one({"email": user_email})
+        if not isUser:
+            return ErrorHandler.NotFound("User not found in the database")
+
+        # Update the user's email verification status and delete the OTP
+        await user_collection.update_one({"email": user_email}, {"$set": {"isEmailVerified": True}})
+        await otp_collection.find_one_and_delete({"email": user_email})
+        return "Email Verified Successfully"
