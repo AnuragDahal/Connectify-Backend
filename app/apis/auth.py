@@ -58,8 +58,8 @@ async def verify_password_reset_token(
         token: str = Query(...),
         email: EmailStr = Depends(get_email_from_token),
         depends: str = Depends(get_current_user)):
-
-    is_verified = await AuthHandler.HandlePasswordResetTokenVerification(email, token)
+    flag = "isPasswordReset"
+    is_verified = await EmailHandler.HandleOtpVerification(email, token, flag)
     return is_verified
 
 
@@ -76,7 +76,9 @@ async def reset_password(password: str, confirm_password: str,
 
 @router.post("/verify", status_code=status.HTTP_200_OK)
 async def email_verification(email: Annotated[EmailStr, Query(..., description="Email to verify")], p: EmailStr = Depends(get_email_from_token), depends: str = Depends(get_current_user)):
-    is_verified = await EmailHandler.HandleEmailVerification(email, p)
+
+    flag = "isEmailVerification"
+    is_verified = await EmailHandler.HandleEmailVerification(email, p, flag)
     return is_verified
 
 
@@ -86,5 +88,6 @@ async def otp_verification(
     email: EmailStr = Depends(get_email_from_token),
     depends: str = Depends(get_current_user)
 ):
-    is_verified = await EmailHandler.HandleOtpVerification(otp, email)
+    flag = "isEmailVerification"
+    is_verified = await EmailHandler.HandleOtpVerification(otp, email, flag)
     return is_verified

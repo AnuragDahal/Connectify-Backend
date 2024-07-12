@@ -23,33 +23,18 @@ class EmailHandler:
         return str(random.randint(100000, 999999))
 
     @staticmethod
-    def send_email_to(recipient: str, otp: int, htmlContent: str, message: dict):
+    def send_email_to(recipient: str, otp: int, htmlContent: str, subject: str):
         # Define your Gmail username and password
         gmail_user = env.GMAIL_USER
         gmail_password = env.APP_SPECIFIC_PASS
 
         # Create a MIMEMultipart object
         msg = MIMEMultipart('alternative')
-        html = f"""
-    <html>
-    <body>
-        <p>Dear User,</p>
-
-        <p>We recently received a request for a new login or signup associated with this email address. If you initiated this request, please enter the following verification code to confirm your identity:</p>
-
-        <p><b>Verification Code: {otp}</b></p>
-
-        <p>If you did not initiate this request, please disregard this email and no changes will be made to your account.</p>
-
-        <p>Thank you,<br>
-        The Connectify Team</p>
-    </body>
-    </html>
-    """
+        html = f'''{htmlContent}'''
         # Add the HTML content to the MIMEMultipart object
         msg.attach(MIMEText(html, 'html'))
-        msg['Subject'] = message["subject"]
-        msg['From'] = "no-reply@connectify.com"
+        msg['Subject'] = subject
+        msg['From'] = "mailer@connectify.com"
         msg['To'] = recipient
 
         # Connect to the Gmail server
@@ -75,15 +60,33 @@ class EmailHandler:
         return False
 
     @staticmethod
-    async def HandleEmailVerification(recipient: str, user_email: str):
+    async def HandleEmailVerification(recipient: str, user_email: str, flag: str):
         try:
             if recipient != user_email:
                 return ErrorHandler.Unauthorized("Invalid Email Address")
             otp = EmailHandler.generate_email_verification_otp()
-            isEmailSent = EmailHandler.send_email_to(recipient, otp)
+            htmlContent = f"""
+                    <html>
+                    <body>
+                        <p>Dear User,</p>
+
+                        <p>We recently received a request for a new login or signup associated with this email address. If you initiated this request, please enter the following verification code to confirm your identity:</p>
+
+                        <p><b>Verification Code: {otp}</b></p>
+
+                        <p>If you did not initiate this request, please disregard this email and no changes will be made to your account.</p>
+
+                        <p>Thank you,<br>
+                        The Connectify Team</p>
+                    </body>
+                    </html>
+                    """
+            sub = "Email Verification"
+            isEmailSent = EmailHandler.send_email_to(
+                recipient, otp, htmlContent, sub)
             # Add the otp to the database
             await otp_collection.insert_one(
-                {"email": recipient, "otp": otp, "expires_on": datetime.now(timezone.utc)})
+                {"email": recipient, "otp": otp, f"{flag}": True, "expires_on": datetime.now(timezone.utc)})
             if isEmailSent:
                 return "Email sent Successfully"
             else:
@@ -92,14 +95,14 @@ class EmailHandler:
             return str(e)
 
     @staticmethod
-    async def HandleOtpVerification(user_otp: str, user_email: str):
+    async def HandleOtpVerification(user_otp: str, user_email: str, flag: str):
         # Get the otp from the database of the specific user
         email_doc = await otp_collection.find_one({"email": user_email})
         if email_doc is not None:
             otp_in_db = email_doc["otp"]
             # Verify the otp
             isOtpVerified = EmailHandler.VerifyOtp(user_otp, otp_in_db)
-            if isOtpVerified:
+            if isOtpVerified and email_doc[f"{flag}"] is True:
                 # Check if the user exists in the user_collection
                 isUser = await user_collection.find_one({"email": user_email})
                 if not isUser:

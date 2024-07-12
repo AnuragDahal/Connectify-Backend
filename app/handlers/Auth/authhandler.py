@@ -96,26 +96,11 @@ class AuthHandler:
         The Connectify Team</p>
     </body>
     </html>'''
-        message = {"subject": "Connectify Account Verification",
-                   "recipient": email}
-        sendEmail = EmailHandler.send_email_to(email, token, htmlContent)
+        sub = "Password Reset Request"
+        sendEmail = EmailHandler.send_email_to(email, token, htmlContent, sub)
         if not sendEmail:
             return ErrorHandler.Error("Email not sent successfully")
         return {"message": "Password reset email sent successfully"}
-
-    @staticmethod
-    async def HandlePasswordResetTokenVerification(email: str, token: str):
-        email_doc = await otp_collection.find_one({"email": email})
-        if email_doc is not None:
-            otp_in_db = email_doc["otp"]
-            # Verify the otp
-            isOtpVerified = EmailHandler.VerifyOtp(token, otp_in_db)
-            if isOtpVerified and email_doc["isPasswordReset"] is True:
-                await otp_collection.find_one_and_delete({"email": email})
-                return "Email Verified Successfully"
-            else:
-                return ErrorHandler.Unauthorized("incorrect OTP")
-        return ErrorHandler.Error("Invalid Email or OTP not found in the database")
 
     @staticmethod
     async def HandlePasswordReset(email: str, password: str, confirm_password: str):
