@@ -21,7 +21,7 @@ class Validate:
 
 class UserManager:
     @staticmethod
-    async def HandleNewUserCreation(request: schemas.UserDetails, image: Optional[UploadFile]):
+    async def HandleNewUserCreation(request: schemas.UserDetails):
         """
         Insert a new user record.
         A unique `id` will be created and provided in the response.
@@ -32,12 +32,7 @@ class UserManager:
             # Add the image to the server and set the url in the db
             user_data = {
                 **request.model_dump(exclude={"password"}), "password": hashed_password, "isEmailVerified": False}
-            if image:
-                img_id = image.filename.split(".")[0][:10]
-                img_byte = image.file.read()  # blocking code
-                img_url = uploadImage(img_id, img_byte)  # blocking code
-                user_data["image"] = img_url
-                # Add the img url to the user's db
+            # Add the img url to the user's db
             new_user = await user_collection.insert_one(user_data)
             return {"id": str(new_user.inserted_id)}
         return ErrorHandler.ALreadyExists("User already exists")

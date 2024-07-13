@@ -1,6 +1,6 @@
 from fastapi.security import OAuth2PasswordRequestForm
-from fastapi import APIRouter, Depends, status, Response, Form, UploadFile, File, Query
-from pydantic import EmailStr, constr
+from fastapi import APIRouter, Depends, status, Response, Body, Query
+from pydantic import EmailStr
 from typing import Annotated
 from ..handlers.Auth.authhandler import AuthHandler
 from ..handlers.User.userhandler import UserManager
@@ -18,17 +18,16 @@ PASSWORD_REGEX = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*
 
 @router.post("/signup", status_code=status.HTTP_201_CREATED)
 async def signup_user(
-    name: str = Form(..., description="User's name"),
-    email: EmailStr = Form(..., description="User's email"),
-    password: str = Form(..., description="User's password"),
-    image: UploadFile = File(None)
+    name: str = Body(..., description="User's name"),
+    email: EmailStr = Body(..., description="User's email"),
+    password: str = Body(..., description="User's password"),
 ):
     # Manually validate the password
     if not re.match(PASSWORD_REGEX, password):
         return ErrorHandler.Error("Password validation failed")
 
     request = schemas.UserDetails(name=name, email=email, password=password)
-    user = await UserManager.HandleNewUserCreation(request, image)
+    user = await UserManager.HandleNewUserCreation(request)
     return user
 
 
