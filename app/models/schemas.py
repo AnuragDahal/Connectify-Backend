@@ -82,6 +82,7 @@ class UserDetails(BaseModel):
     isEmailVerified: Optional[bool] = False
     friends: Optional[List[str]] = []
     friend_requests: Optional[List[str]] = []
+    sent_friend_requests: Optional[List[str]] = []
     profile_picture: Optional[str] = str()
     # posts: Optional[List[Dict[str, Any]]] = []
     posts: Optional[List[str]] = []

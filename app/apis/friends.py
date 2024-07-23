@@ -39,6 +39,12 @@ async def show_friend_requests(user_email: EmailStr = Depends(get_email_from_tok
     return response
 
 
+@router.get("/requests/sent", status_code=status.HTTP_200_OK)
+async def show_sent_friend_requests(user_email: EmailStr = Depends(get_email_from_token)):
+    response = await FriendsHandler.HandleShowSentFriendRequests(user_email)
+    return response
+
+
 @router.delete("/requests/remove", status_code=status.HTTP_200_OK)
 async def remove_friend_requests(
     friend_email: Annotated[EmailStr, Query(..., description="Email of the friend to remove")],
