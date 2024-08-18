@@ -16,6 +16,7 @@ router = APIRouter(prefix='/api/v1', tags=["Auth"])
 PASSWORD_REGEX = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,16}$"
 
 
+
 @router.post("/signup", status_code=status.HTTP_201_CREATED)
 async def signup_user(
     name: str = Body(..., description="User's name"),
@@ -23,6 +24,14 @@ async def signup_user(
     password: str = Body(..., description="User's password"),
 ):
     # Manually validate the password
+    if len(password) < 8 or len(password) > 50:
+        return ErrorHandler.Error("Password must be between 8 and 50 characters long")
+    if not any(char.isupper() for char in password):
+        return ErrorHandler.Error("Password must contain at least one uppercase letter")
+    if not any(char in "@$!%*?&" for char in password):
+        return ErrorHandler.Error("Password must contain at least one special character (@$!%*?&)")
+    if not any(char.isdigit() for char in password):
+        return ErrorHandler.Error("Password must contain at least one numeric character")
     if not re.match(PASSWORD_REGEX, password):
         return ErrorHandler.Error("Password validation failed")
 

@@ -41,7 +41,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 @app.get('/')
 def root():
-    return {"message": "Welcome to Webservice API, navigate to /docs for documentation."}
+    return {"message": "Welcome to Connectify API, navigate to /docs for documentation."}
 
 
 @app.get('/home')
